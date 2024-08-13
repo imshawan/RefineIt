@@ -1,48 +1,12 @@
-# Gin REST API Backend Starter
-
-A robust "kickstarter" template for building backend applications using the Gin web framework in Go. This project provides a well-organized structure with essential features like MongoDB integration, JWT-based authentication, and middleware support. It aims to simplify the setup of a functional backend environment, allowing developers to focus on application-specific functionality. 
-
-While it provides a comprehensive starting point, it remains adaptable for further customization and expansion, allowing developers to incorporate additional architectural patterns or advanced features as needed. This makes it an effective foundation for creating scalable and maintainable web services in Go.
-
-## Project Structure
-```bash
-gin-backend-starter/
-├── assets      # Static files and resources
-├── configs     # Configuration files and setup, these would execute during the pre-start process of the server
-├── helpers     # Utility functions and common helpers
-├── infra       # Infrastructure-related code (database, logger, etc. that would be used throughout the app)
-├── models      # Data models and database schemas
-├── routers     # HTTP route definitions and handlers mapping
-├── services    # Business logic and service layer implementations
-├── .env        # Application config
-├── .env.example
-├── .gitignore
-├── air.toml
-├── go.mod
-├── go.sum
-├── LICENSE
-├── main.go     # Main entry point for the application
-└── README.md
-```
-
-## Features
-
-- Structured project layout for scalability
-- Configuration management
-- MongoDB integration
-- JWT authentication
-- User management
-- Middleware support
-- Logging
-- Environment variable configuration
+# RefineIt
 
 ## Getting Started
 
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/imshawan/gin-backend-starter.git
-    cd gin-backend-starter
+    git clone https://github.com/imshawan/RefineIt.git
+    cd RefineIt
     ```
 
 2. **Copy the example environment file and update the values:**
@@ -67,13 +31,6 @@ gin-backend-starter/
 
 Update the `.env` file with your specific configurations before starting the app
 
-
-## Starter API Routes
-
-- `POST /api/users/register`: Register a new user
-- `POST /api/auth/sign-in`: User login
-- `GET /api/users`: Get the currently logged-in user (protected route)
-- `GET /health`: Check the server status, if running
 
 ## Major Dependencies
 
