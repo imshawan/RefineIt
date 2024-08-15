@@ -1,50 +1,48 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/imshawan/gin-backend-starter/helpers"
-	"github.com/imshawan/gin-backend-starter/infra/database"
-	"github.com/imshawan/gin-backend-starter/models"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/imshawan/RefineIt/helpers"
+	"github.com/imshawan/RefineIt/internal/user"
+	"github.com/imshawan/RefineIt/models"
 )
 
 func IsAuthenticated() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Get the Authorization header
-        authHeader := ctx.GetHeader("Authorization")
+		authHeader := ctx.GetHeader("Authorization")
 
-        // Check if the header contains a Bearer token
-        if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		// Check if the header contains a Bearer token
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("authorization header is missing or invalid"))
-            ctx.Abort()
-            return
-        }
+			ctx.Abort()
+			return
+		}
 
-        // Extract the token
-        token := strings.TrimPrefix(authHeader, "Bearer ")
+		// Extract the token
+		token := strings.TrimPrefix(authHeader, "Bearer ")
 		claims, err := helpers.ValidateJWTToken(token)
 		if err != nil {
 			helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, err)
-            ctx.Abort()
-            return
+			ctx.Abort()
+			return
 		}
 
-		usersCollection := database.Mongo.Collection("users")
-
 		var existingUser models.User
-		if err := usersCollection.FindOne(context.TODO(), bson.M{"_id": claims.ID}).Decode(&existingUser); err != nil {
-			helpers.FormatAPIResponse(ctx, http.StatusForbidden, errors.New("could not find user associated with this token"))
+		if usr, err := user.GetUserByField(ctx, "id", claims.ID);  err != nil || (usr.ID == "") {
+			helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("could not find user associated with this token"))
 			return
+		} else {
+			existingUser = usr
 		}
 
 		ctx.Set("User", existingUser)
 
-        // Proceed to the next middleware or handler
-        ctx.Next()
+		// Proceed to the next middleware or handler
+		ctx.Next()
 	}
 }

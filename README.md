@@ -35,7 +35,7 @@ Update the `.env` file with your specific configurations before starting the app
 ## Major Dependencies
 
 - [Gin Web Framework](https://github.com/gin-gonic/gin) for creating the REST APIs
-- [MongoDB Go Driver](https://github.com/mongodb/mongo-go-driver) for communicating with MongoDB NoSql Database
+- [Postgres Go Driver](https://pkg.go.dev/github.com/lib/pq) for communicating with Sql Database
 - [JWT Go](https://github.com/golang-jwt/jwt/) for authentication purposes
 - [Viper](github.com/spf13/viper) for config management throughout the application
 

@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/imshawan/gin-backend-starter/configs"
-	"github.com/imshawan/gin-backend-starter/infra/database"
-	"github.com/imshawan/gin-backend-starter/routers"
+	"github.com/imshawan/RefineIt/configs"
+	"github.com/imshawan/RefineIt/infra/database"
+	"github.com/imshawan/RefineIt/routers"
 	"github.com/spf13/viper"
 )
 

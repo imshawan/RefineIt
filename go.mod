@@ -1,12 +1,20 @@
-module github.com/imshawan/gin-backend-starter
+module github.com/imshawan/RefineIt
 
 go 1.22.5
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/spf13/viper v1.19.0
-	go.mongodb.org/mongo-driver v1.16.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/spf13/viper v1.19.0
+)
+
+require github.com/google/uuid v1.6.0 // indirect
+
+require (
+	github.com/lib/pq v1.10.9
+	github.com/mfridman/interpolate v0.0.2 // indirect
+	github.com/pressly/goose/v3 v3.21.1 // indirect
+	github.com/sethvargo/go-retry v0.3.0 // indirect
 )
 
 require (
@@ -48,12 +56,12 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.9.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.25.0
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
+	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect

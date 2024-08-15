@@ -1,18 +1,15 @@
 package services
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/imshawan/gin-backend-starter/helpers"
-	"github.com/imshawan/gin-backend-starter/infra/database"
-	"github.com/imshawan/gin-backend-starter/models"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/imshawan/RefineIt/helpers"
+	"github.com/imshawan/RefineIt/internal/user"
+	"github.com/imshawan/RefineIt/models"
 )
 
 func UserProfile(ctx *gin.Context) {
@@ -30,16 +27,18 @@ func RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	usersCollection := database.Mongo.Collection("users")
-
-	var existingUser models.User
-	if err := usersCollection.FindOne(context.TODO(), bson.M{"email": userReq.Email}).Decode(&existingUser); err == nil {
-		helpers.FormatAPIResponse(ctx, http.StatusConflict, errors.New("user with this email already exists"))
+	if usr, err := user.GetUserByField(ctx, "email", userReq.Username);  err == nil || (usr.ID != "") {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("user with this email already exists"))
+		return
+	}
+	if usr, err := user.GetUserByField(ctx, "username", userReq.Username);  err == nil || (usr.ID != "") {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("user with this username already exists"))
 		return
 	}
 
-	if err := usersCollection.FindOne(context.TODO(), bson.M{"username": userReq.Username}).Decode(&existingUser); err == nil {
-		helpers.FormatAPIResponse(ctx, http.StatusConflict, errors.New("user with this username already exists"))
+	id, err := helpers.GenerateUUID()
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -51,7 +50,7 @@ func RegisterUser(ctx *gin.Context) {
 	}
 
 	newUser := models.User{
-		ID:           primitive.NewObjectID(),
+		ID:			  id,
 		Username:     userReq.Username,
 		Email:        userReq.Email,
 		PasswordHash: hashedPassword, // Store the hashed password
@@ -61,12 +60,12 @@ func RegisterUser(ctx *gin.Context) {
 		IsActive:     true,
 	}
 
-	_, err = usersCollection.InsertOne(context.TODO(), newUser)
+	userData, err := user.CreateUser(newUser)
 	if err != nil {
 		fmt.Print(err)
 		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, errors.New("failed to register user"))
 		return
 	}
 
-	helpers.FormatAPIResponse(ctx, http.StatusCreated, gin.H{"message": "User registered successfully"})
+	helpers.FormatAPIResponse(ctx, http.StatusCreated, gin.H{"message": "User registered successfully", "user": userData})
 }
