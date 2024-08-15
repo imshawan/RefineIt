@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/imshawan/gin-backend-starter/helpers"
-	"github.com/imshawan/gin-backend-starter/routers/middlewares"
+	"github.com/imshawan/RefineIt/helpers"
+	"github.com/imshawan/RefineIt/routers/middlewares"
 	"github.com/spf13/viper"
 )
 

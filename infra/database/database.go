@@ -1,44 +1,37 @@
 package database
 
 import (
-	"context"
-	"fmt"
+    "database/sql"
+    "fmt"
 
-	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+    _ "github.com/lib/pq"
+    "github.com/spf13/viper"
 )
 
-var Mongo mongo.Database
+// Postgres holds the PostgreSQL database connection
+var Client *sql.DB
 
+// SetupDbConnection sets up the connection to the PostgreSQL database
 func SetupDbConnection() error {
 
-	viper.SetDefault("DATABASE_URI", "mongodb://localhost:27017")
-	viper.SetDefault("DATABASE_NAME", "test")
+    // Retrieve the connection string from the configuration
+    connString := viper.GetString("GOOSE_DBSTRING")
 
-	uri := viper.GetString("DATABASE_URI")
-	dbName := viper.GetString("DATABASE_NAME")
+    // Open a connection to the PostgreSQL database
+    db, err := sql.Open("postgres", connString)
+    if err != nil {
+        return fmt.Errorf("failed to open database connection: %w", err)
+    }
 
-	// Create a new client and connect to the server
+    // Ping the database to ensure that the connection is established
+    if err := db.Ping(); err != nil {
+        return fmt.Errorf("failed to ping database: %w", err)
+    }
 
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)
-	// Create a new client and connect to the server
-	client, err := mongo.Connect(context.TODO(), opts)
-	if err != nil {
-		return err
-	}
+    fmt.Println("Successfully connected to PostgreSQL!")
 
-	// Send a ping to confirm a successful connection
-	var result bson.M
-	var database = client.Database(dbName)
-	if err := database.RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
-		return err
-	}
-	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+    // Assign the database connection to the global variable
+    Client = db
 
-	Mongo = *database
-
-	return nil
+    return nil
 }
