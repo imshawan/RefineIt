@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
     };
 
     return (
-        <div className="flex justify-content-center">
+        <div className="flex justify-content-center mx-4 md:mx-0">
             <footer style={styles.container} className="border-top-1 surface-border py-6">
                 <div className="mx-auto">
                     <div className="flex flex-wrap justify-content-between align-items-center gap-4 mb-6">

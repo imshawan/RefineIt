@@ -12,3 +12,19 @@ migrate-up:
 
 migrate-down:
 	goose -dir $(GOOSE_MIGRATION_DIR) down
+
+dev-app:
+	cd web/app && \
+	npm start
+
+dev-website:
+	cd web/website && \
+	npm start
+
+app:
+	cd web/app && \
+	npm install && npm run build
+
+website:
+	cd web/website && \
+	npm install && npm run build
