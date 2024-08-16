@@ -61,8 +61,8 @@ const Footer: React.FC = () => {
                     </div>
                     <div className="flex flex-wrap justify-content-between align-items-center gap-4">
                         <div className="">
-                            <div className="text-sm text-600 mb-2">© 2024 Refine.It. All rights reserved.</div>
-                            <div className="text-sm text-600">Designed and developed by Shawan Mandal</div>
+                            <div className="text-sm text-600 mb-2">Copyright © 2024 Refine.It. All rights reserved.</div>
+                            <div className="text-sm text-600">Developed with ❤️ by <a style={styles.link} href="https://www.imshawan.dev/" target="_blank">Shawan Mandal</a></div>
                         </div>
                         <div className="flex gap-4">
                             {["Terms", "Privacy", "Cookies"].map((item) => (
@@ -88,6 +88,10 @@ const styles = {
     email: {
         borderRadius: "var(--border-radius)",
     },
+    link: {
+        textDecoration: "none",
+        color: "var(--primary-color)"
+    }
 };
 
 export default Footer;
