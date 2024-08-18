@@ -11,6 +11,8 @@ import { Divider } from 'primereact/divider';
 import { FloatLabel } from 'primereact/floatlabel';
 import { classNames } from 'primereact/utils'
 import { FormFieldError } from '../../components';
+import { useAuthentication } from '../../hooks/authentication';
+import { Toast } from 'primereact/toast';
 
 const schema = z.object({
     email: z.string().nonempty({ message: "Username or email is required" }).min(3, { message: "Enter a valid username or email" }),
@@ -48,11 +50,24 @@ type FormValues = z.infer<typeof schema>;
 
 export const SignIn: React.FC = () => {
     const [rememberMe, setRememberMe] = useState(false);
+    const { signIn } = useAuthentication();
     const { classes } = useStyles();
     const { control, formState: { errors }, handleSubmit } = useForm<FormValues>({ resolver: zodResolver(schema) });
+    const toast = React.useRef<Toast | null>(null);
+
+    const success = () => {
+        toast.current?.show({ severity: "success", summary: "Success", detail: "Signed in successfully!", life: 3000 });
+    }
+
+    const failure = (message: string) => {
+        toast.current?.show({ severity: "error", summary: "Error", detail: message, life: 3000 });
+    }
 
     const onSubmit: SubmitHandler<FormValues> = (formData) => {
-        console.log("Data:", formData);
+        let {email: Username, password: Password} = formData;
+        let formValues = {Username, Password}
+
+        signIn({formValues, success, failure})
     }
 
     return (
@@ -162,7 +177,7 @@ export const SignIn: React.FC = () => {
                     </div>
                 </div>
             </div>
-
+            <Toast ref={toast} />
         </div>
     );
 };

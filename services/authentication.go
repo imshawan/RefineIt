@@ -13,11 +13,11 @@ import (
 )
 
 func SignIn(ctx *gin.Context) {
-	var userReq models.UserRequest
+	var userReq models.UserSigninRequest
 	var field string = "username"
 
 	// Bind and validate the request body
-	if err := ctx.ShouldBind(&userReq); err != nil {
+	if err := ctx.ShouldBindJSON(&userReq); err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
 		return
 	}
@@ -38,7 +38,7 @@ func SignIn(ctx *gin.Context) {
 	}
 
 	if !match {
-		helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("invalid credentials"))
+		helpers.FormatAPIResponse(ctx, http.StatusForbidden, errors.New("invalid credentials"))
 		return
 	}
 	token, err := helpers.SignJWTToken(existingUser)

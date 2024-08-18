@@ -1,8 +1,11 @@
 package middlewares
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -13,6 +16,55 @@ import (
 
 func ValidateRequestFields(model interface{}) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var jsonData map[string]interface{}
+		contentType := ctx.GetHeader("Content-Type")
+
+		if contentType == "application/json" {
+			// Step 2a: Parse JSON data
+			bodyBytes, err := io.ReadAll(ctx.Request.Body)
+			if err != nil {
+				helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("failed to read request body"))
+				return
+			}
+
+			if len(bodyBytes) == 0 {
+				helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("empty request body"))
+				return
+			}
+
+			// Unmarshal JSON into a map
+			err = json.Unmarshal(bodyBytes, &jsonData)
+			if err != nil {
+				helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+				return
+			}
+		} else if contentType == "application/x-www-form-urlencoded" {
+			err := ctx.Request.ParseForm()
+			if err != nil {
+				helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("failed to parse form data"))
+				return
+			}
+
+			// Convert form data to JSON-like structure
+			jsonData = make(map[string]interface{})
+			for key, values := range ctx.Request.PostForm {
+				// Since PostForm is map[string][]string, take the first value
+				if len(values) > 0 {
+					jsonData[key] = values[0]
+				}
+			}
+		}
+
+		// Step 4: Marshal the modified data back into JSON
+		modifiedBodyBytes, err := json.Marshal(jsonData)
+		if err != nil {
+			helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, errors.New("failed to marshal modified data"))
+			return
+		}
+
+		// Replace the request body with the modified JSON
+		ctx.Request.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
+
 		if err := ctx.ShouldBind(model); err != nil {
 			var validationError error
 
@@ -35,6 +87,8 @@ func ValidateRequestFields(model interface{}) gin.HandlerFunc {
 			helpers.FormatAPIResponse(ctx, http.StatusBadRequest, validationError)
 			ctx.Abort() // Stop further processing
 			return
+		} else {
+			ctx.Request.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
 		}
 
 		// If validation passes, continue to the next handler
