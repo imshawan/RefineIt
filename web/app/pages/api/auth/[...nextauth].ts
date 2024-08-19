@@ -34,7 +34,7 @@ const providers = [
                         throw new Error("Network error, connection refused");
                     }
 
-                    let data = error?.response?.data as ApiResponse.BaseResponse;
+                    let data = error?.response?.data as ApiResponse.IBaseResponse;
                     let message = data?.status?.message;
                     
                     if (data.response && data.response.message) {

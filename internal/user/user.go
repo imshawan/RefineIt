@@ -6,13 +6,20 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/imshawan/RefineIt/helpers"
 	"github.com/imshawan/RefineIt/infra/database"
 	"github.com/imshawan/RefineIt/models"
+	"github.com/lib/pq"
 )
 
 // GetUserByField retrieves a user by a specified field and value
-func GetUserByField(ctx *gin.Context, field string, value string) (models.User, error) {
+func GetUserByField(ctx *gin.Context, field string, value string, includePasswordHash ...bool) (models.User, error) {
 	var user models.User
+
+	includePassword := false
+    if len(includePasswordHash) > 0 {
+        includePassword = includePasswordHash[0]
+    }
 
 	// Sanitize and validate the field and value
 	sanitizedField, sanitizedValue, err := sanitizeFieldAndValue(field, value)
@@ -20,8 +27,10 @@ func GetUserByField(ctx *gin.Context, field string, value string) (models.User, 
 		return user, fmt.Errorf("invalid input: %w", err)
 	}
 
+	fields := []string{"id", "username", "email", "password_hash", "fullname", "created_at", "updated_at", "is_active"}
+
 	// Build the query
-	query := fmt.Sprintf("SELECT id, username, email, password_hash, fullname, created_at, updated_at, is_active FROM users WHERE %s = $1", sanitizedField)
+	query := fmt.Sprintf("SELECT %s FROM users WHERE %s = $1", strings.Join(fields, ", "), sanitizedField)
 
 	// Execute the query with the parameterized value
 	row := database.Client.QueryRowContext(ctx, query, sanitizedValue)
@@ -30,9 +39,13 @@ func GetUserByField(ctx *gin.Context, field string, value string) (models.User, 
 	err = row.Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Fullname, &user.CreatedAt, &user.UpdatedAt, &user.IsActive)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user, fmt.Errorf("invalid credentials")
+			return user, fmt.Errorf("no such user")
 		}
 		return user, err
+	}
+
+	if !includePassword {
+		user.PasswordHash = ""
 	}
 
 	return user, nil
@@ -50,6 +63,10 @@ func CreateUser(user models.User) (models.User, error) {
         &user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.Fullname, &user.CreatedAt, &user.UpdatedAt, &user.IsActive,
     )
     if err != nil {
+		// Check for unique violation error code
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return user, fmt.Errorf(helpers.ExtractUniqueFieldError(pqErr.Detail))
+		}
         return user, fmt.Errorf("error inserting user into the database: %w", err)
     }
 

@@ -26,7 +26,7 @@ func SignIn(ctx *gin.Context) {
 		field = "email"
 	}
 
-	existingUser, err := user.GetUserByField(ctx, field, userReq.Username)
+	existingUser, err := user.GetUserByField(ctx, field, userReq.Username, true)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
 		return

@@ -1,9 +1,9 @@
 import React from "react";
-import UserInputForm from "@refineit/components/signin/UserInputForm";
+import RegisterationForm from "@refineit/components/register/RegisterationForm";
 import { redirect } from "next/navigation";
 import { getNextServerSession } from "@refineit/lib/auth";
 
-const SignIn: React.FC = async () => {
+const Register: React.FC = async () => {
     const session = await getNextServerSession();
     if (session) {
         redirect("/");
@@ -21,23 +21,23 @@ const SignIn: React.FC = async () => {
                     backgroundColor: "rgba(55, 55, 55, 0.5)"
                 }}>
                     <div className="flex flex-column justify-content-center h-full">
-                        <h2 className="text-5xl font-bold text-white mb-4">Transform Code Reviews</h2>
+                        <h2 className="text-5xl font-bold text-white mb-4">Join Our Community</h2>
                         <p className="text-white line-height-3 mb-4">
-                            Make informed decisions with Refine. It&lsquo;s powerful collaboration tools.
-                            Harness the power of peer reviews to drive your development forward.
+                            Refine.It is where developers come together to elevate their code. 
+                            Sign up now to access powerful collaboration tools and expert reviews.
                         </p>
                         <ul className="list-none p-0 m-0 text-white">
                             <li className="flex align-items-center mb-3">
                                 <i className="pi pi-check-circle mr-2"></i>
-                                <span>Streamline code review process</span>
+                                <span>Access to expert code reviewers</span>
                             </li>
                             <li className="flex align-items-center mb-3">
                                 <i className="pi pi-check-circle mr-2"></i>
-                                <span>Foster team collaboration</span>
+                                <span>Collaborate on projects in real-time</span>
                             </li>
                             <li className="flex align-items-center">
                                 <i className="pi pi-check-circle mr-2"></i>
-                                <span>Improve code quality</span>
+                                <span>Improve your coding skills</span>
                             </li>
                         </ul>
                     </div>
@@ -45,19 +45,19 @@ const SignIn: React.FC = async () => {
             </div>
 
             <div className="w-full md:w-6 lg:w-5 flex flex-column justify-content-between pb-3">
-                <div className="p-4 pt-6 md:pt-5 sm:px-8 md:px-5 lg:px-4 xl:px-8">
-                    <div className="text-center mb-5">
+                <div className="p-4 md:pt-5 sm:px-8 md:px-5 lg:px-4 xl:px-8">
+                    <div className="text-center mb-4">
                         <i className="pi pi-code text-5xl text-primary"></i>
-                        <h2 className="text-3xl font-bold mb-1 mt-3">Welcome Back to Refine.It</h2>
-                        <p className="mt-0">Enter your credentials to continue.</p>
+                        <h2 className="text-3xl font-bold mb-1 mt-3">Create an Account</h2>
+                        <p className="mt-0">Join our community of code reviewers and collaborators.</p>
                     </div>
-                    <UserInputForm />
+                    <RegisterationForm />
                     <div className="text-center">
-                        <span>Don&lsquo;t have an account? </span>
-                        <a href="/register" className="font-medium hover:text-green-600" style={{
+                        <span>Already have an account? </span>
+                        <a href="/sign-in" className="font-medium hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Register</a>
+                        }}>Sign In</a>
                     </div>
                 </div>
                 <div className="flex justify-content-between px-4 sm:px-8 md:px-5 lg:px-4 xl:px-8">
@@ -77,10 +77,8 @@ const SignIn: React.FC = async () => {
                     </div>
                 </div>
             </div>
-            
         </div>
     );
 };
 
-
-export default SignIn;
+export default Register;

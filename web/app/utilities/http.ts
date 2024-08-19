@@ -1,5 +1,7 @@
+import _ from "lodash";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_SERVER_HOST } from "@refineit/common";
+import { ApiResponse } from "@refineit/types/response";
 
 const handleLogout = (): void => {
     // ["user", "authenticated", "token"].forEach(e => localStorage.removeItem(e));
@@ -72,9 +74,27 @@ export const http = {
             throw error;
         }
     },
+
+    parseHttpError(error: Error): ApiResponse.IBaseResponse | string {
+        if (axios.isAxiosError(error) && error.response) {
+            const {status: statusCode, data} = error.response;
+    
+            if (error.code === "ECONNREFUSED") {
+                throw new Error("Network error, connection refused");
+            }
+    
+            return _.merge(data, {statusCode}) as ApiResponse.IBaseResponse;
+        }
+    
+        return error.message;
+    },
+
+    isHttpError(error: any): error is ApiResponse.IBaseResponse {
+        return typeof error === "object" && error !== null && "statusCode" in error && "status" in error;
+    }
 };
 
-// Function to handle errors
+// Function to handle 401 and other errors based on status codes
 function handleApiError(error: any) {
     if (axios.isAxiosError(error)) {
         const status = error.response?.status;

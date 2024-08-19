@@ -10,12 +10,13 @@ export namespace ApiResponse {
         is_active: boolean;
     }
 
-    interface ISignInUser extends User {
+    interface ISignInUser extends IUser {
         token: string;
     }
 
     // Define the main response interface
-    interface BaseResponse {
+    interface IBaseResponse {
+        statusCode: number;
         status: {
             code: string;
             error: boolean;

@@ -63,9 +63,26 @@ func RegisterUser(ctx *gin.Context) {
 	userData, err := user.CreateUser(newUser)
 	if err != nil {
 		fmt.Print(err)
-		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, errors.New("failed to register user"))
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	helpers.FormatAPIResponse(ctx, http.StatusCreated, gin.H{"message": "User registered successfully", "user": userData})
+}
+
+func UsernameExists(ctx *gin.Context) {
+	username := ctx.Param("term")
+
+	usr, err := user.GetUserByField(ctx, "username", username)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusNotFound, nil)
+		return
+	}
+	fmt.Println("username", usr)
+	if usr.ID != "" {
+		helpers.FormatAPIResponse(ctx, http.StatusOK, nil)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusNotFound, nil)
 }

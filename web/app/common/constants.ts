@@ -6,6 +6,7 @@ export const endpoints = {
     },
     USERS: {
         REGISTER: `${API_SERVER_HOST}/api/users/register`,
-        PROFILE: `${API_SERVER_HOST}/api/users/{{userId}}/profile`
+        PROFILE: `${API_SERVER_HOST}/api/users/{{userId}}/profile`,
+        CHECK_USERNAME_AVAILABILITY: `${API_SERVER_HOST}/api/users/username/{{name}}`,
     }
 }

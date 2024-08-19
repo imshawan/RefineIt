@@ -10,4 +10,5 @@ import (
 func RegisterUserRoutes(router *gin.RouterGroup) {
 	router.GET("/", middlewares.IsAuthenticated(), services.UserProfile)
 	router.POST("/register", middlewares.ValidateRequestFields(&models.UserRequest{}), services.RegisterUser)
+	router.GET("/username/:term", services.UsernameExists)
 }
