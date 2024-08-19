@@ -2,6 +2,7 @@
 import { MutableObject } from "../types";
 
 export * from "./http";
+export * from "./misc";
 
 export const parseParams = (endpoint: string, params: MutableObject): string => {
     if (!endpoint || !params) {

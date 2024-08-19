@@ -22,3 +22,10 @@ body {
 .p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {
     border-color: var(--primary-color);
 }
+.p-icon-badge-button {
+    box-shadow: none!important;
+    border-color: none;
+}
+.p-icon-badge-button:focus {
+    background-color: var(--cyan-100);
+}

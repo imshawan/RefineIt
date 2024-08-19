@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Navigation from "@refineit/components/Navbar";
 
 export default function Home() {
     const { data, status } = useSession();
@@ -28,8 +29,11 @@ export default function Home() {
     }
 
     return (
-        <div className="container">
-            <h1 className="text-4xl">Home</h1>
-        </div>
+        <React.Fragment>
+            <Navigation />
+            <div className="container">
+                <h1 className="text-4xl">Home</h1>
+            </div>
+        </React.Fragment>
     )
 }

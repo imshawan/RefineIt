@@ -32,7 +32,7 @@ export default function RootLayout({ children, session }: {
             <body>
                 <SessionProvider session={session}>
                     <Provider store={store}>
-                        <PrimeReactProvider value={{ appendTo: "self" }}>
+                        <PrimeReactProvider value={{ appendTo: "self", ripple: true }}>
                             {children}
                             <Toaster position="top-right" richColors />
                         </PrimeReactProvider>
