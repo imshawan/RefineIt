@@ -15,7 +15,7 @@ migrate-down:
 
 dev-app:
 	cd web/app && \
-	npm start
+	npm run dev
 
 dev-website:
 	cd web/website && \
