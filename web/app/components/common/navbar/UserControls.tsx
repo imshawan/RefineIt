@@ -42,7 +42,7 @@ export default function UserControls() {
     ]);
 
     const onSearchbarExpand = (value: boolean) => {
-        if (value && breakpoints('mobile')) {
+        if (value && breakpoints("mobile")) {
             setExpanded(true);
         } else {
             setExpanded(false);
@@ -50,7 +50,7 @@ export default function UserControls() {
     }
 
     return (
-        <div className={"flex " + ""}>
+        <div className={"flex " + (expanded ? "search-expanded" : "")}>
             <ExpandableSearchBar onExpand={onSearchbarExpand} />
             {!expanded && <React.Fragment>
                 <Button className="p-button-sm p-button-icon-only p-button-link hover:bg-gray-200 p-icon-badge-button">

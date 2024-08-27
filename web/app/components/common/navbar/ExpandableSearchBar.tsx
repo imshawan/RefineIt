@@ -22,6 +22,7 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
         if (onExpand && typeof onExpand === "function") {
             onExpand(expanded);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expanded])
 
     const toggleExpand = () => {
@@ -39,7 +40,7 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
     };
 
     return (
-        <div ref={containerRef} className="relative h-3rem"
+        <div ref={containerRef} className={"relative h-3rem"}
             style={{
                 width: expanded ? "21rem" : "3rem",
                 transition: "width 0.3s ease-in-out",
@@ -61,7 +62,7 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
                     className="w-full pr-3rem"
                 />
             </div>
-            <Button onClick={toggleExpand} className="p-button-sm p-button-icon-only p-button-link p-button-text absolute right-0 top-0 z-1 hover:bg-gray-200 p-icon-badge-button">
+            <Button onClick={toggleExpand} className="p-button-sm p-button-icon-only p-button-link p-button-text absolute right-0 top-0 z-1 p-icon-badge-button">
                 <i className={"pi p-overlay-badge mt-1 text-black-alpha-60 pi-" + (expanded ? "times" : "search")} style={{ fontSize: "1.2rem" }} />
             </Button>
         </div>

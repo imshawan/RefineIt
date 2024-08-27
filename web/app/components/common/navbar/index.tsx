@@ -16,6 +16,7 @@ const Navigation: React.FC = () => {
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const router = useRouter();
     const { data, status } = useSession();
+    const sidebarIcon = useRef<Button>(null);
 
     const items = useRef([
         {
@@ -59,13 +60,13 @@ const Navigation: React.FC = () => {
     );
 
     return (
-        <div className="card">
+        <div className="card sticky top-0 z-5">
             <div className="hidden lg:block">
                 <Menubar model={removeIcons(items.current)} start={Logo} end={UserControls}
                     className="shadow-2 border-noround surface-overlay px-4 shadow-2 flex align-items-center justify-content-between relative lg:static" />
             </div>
             <div className="lg:hidden flex justify-content-between px-4 surface-100 shadow-2 py-2">
-                <Button icon="pi pi-bars" onClick={() => setSidebarVisible(true)} className="p-button-text text-black-alpha-90" />
+                <Button icon="pi pi-bars" ref={sidebarIcon} onClick={() => setSidebarVisible(true)} className="p-button-text text-black-alpha-90 sidebar-toggle-btn" />
                 <UserControls />
                 <Sidebar header={<Logo />} visible={sidebarVisible} onHide={() => setSidebarVisible(false)}>
                     <div className="flex flex-column h-full">

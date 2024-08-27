@@ -29,3 +29,11 @@ body {
 .p-icon-badge-button:focus {
     background-color: var(--cyan-100);
 }
+.feeds-section .p-card {border-radius: 10px;}
+.feeds-section .p-card-body {padding: 0px;}
+.feeds-section {height: calc(100vh - 66px); padding-top: 10px;}
+@media only screen and (max-width: 767.9px) {
+    .feeds-section {
+        height: auto!important;
+    }
+}
