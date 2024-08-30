@@ -32,6 +32,15 @@ body {
 .feeds-section .p-card {border-radius: 10px;}
 .feeds-section .p-card-body {padding: 0px;}
 .feeds-section {height: calc(100vh - 66px); padding-top: 10px;}
+.rounded-progress-bar .p-progressbar-value {
+    border-top-right-radius: 1rem; /* Adjust the value as needed */
+    border-bottom-right-radius: 1rem; /* Adjust the value as needed */
+}
+.project-creation .p-fileupload-content {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.project-creation .p-fileupload-content .p-button-danger {padding: 1rem;}
 @media only screen and (max-width: 767.9px) {
     .feeds-section {
         height: auto!important;
