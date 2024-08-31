@@ -2,6 +2,8 @@
 -- +goose StatementBegin
 BEGIN;
 
+SET TIME ZONE 'UTC';
+
 CREATE OR REPLACE FUNCTION add_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN

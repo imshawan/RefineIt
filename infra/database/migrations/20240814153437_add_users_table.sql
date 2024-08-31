@@ -13,19 +13,19 @@ CREATE TABLE
 		fullname VARCHAR(20) NOT NULL,
 		is_active BOOLEAN DEFAULT TRUE,
         role role_type DEFAULT 'user',
-        last_login TIMESTAMPTZ,
+        last_login TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         profile_picture TEXT DEFAULT '',
         bio TEXT DEFAULT '',
-        phone_number VARCHAR(20),
+        phone_number VARCHAR(20) DEFAULT '',
         location TEXT DEFAULT '',
         reviews_count INT DEFAULT 0,
         projects_count INT DEFAULT 0,
         feedbacks_given INT DEFAULT 0,
         feedbacks_received INT DEFAULT 0,
         user_settings JSONB DEFAULT '{}'::jsonb, -- Storing user-specific settings as JSONB
-        account_type VARCHAR(20), -- Optional field for user account type (e.g., standard, premium)
+        account_type VARCHAR(20) DEFAULT 'standard', -- Optional field for user account type (standard, premium)
         two_factor_enabled BOOLEAN DEFAULT FALSE, -- Indicates if 2FA is enabled
-        sign_up_source VARCHAR(50), -- Optional field for tracking the sign-up source
+        sign_up_source VARCHAR(50) DEFAULT 'credentials' CHECK (sign_up_source IN ('credentials', 'oauth')), -- field for tracking the sign-up source
         last_password_change TIMESTAMPTZ,
         suspended BOOLEAN DEFAULT FALSE, -- Indicates if the user account is suspended
         email_verified BOOLEAN DEFAULT FALSE, -- Indicates if the user's email has been verified

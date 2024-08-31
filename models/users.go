@@ -61,20 +61,20 @@ type User struct {
 	Bio                *string                 `json:"bio,omitempty"`
 	PhoneNumber        *string                 `json:"phone_number,omitempty"`
 	Location           *string                 `json:"location,omitempty"`
-	ReviewsCount       *int                    `json:"reviews_count"`
-	ProjectsCount      *int                    `json:"projects_count"`
-	FeedbacksGiven     *int                    `json:"feedbacks_given"`
-	FeedbacksReceived  *int                    `json:"feedbacks_received"`
-	UserSettings       *map[string]interface{} `json:"user_settings,omitempty"`                                 // Optional field for user-specific settings
-	AccountType        *string                 `json:"account_type,omitempty" binding:"oneof=standard premium"` // Optional field for user account type (standard, premium)
-	TwoFactorEnabled   *bool                   `json:"two_factor_enabled"`                                      // Indicates if 2FA is enabled
-	SignUpSource       *string                 `json:"sign_up_source,omitempty"`                                // Optional field for tracking the sign-up source
-	LastPasswordChange *time.Time              `json:"last_password_change,omitempty"`                          // Optional field for last password change
-	Suspended          *bool                   `json:"suspended"`                                               // Indicates if the user account is suspended
-	EmailVerified      *bool                   `json:"email_verified"`                                          // Indicates if the user's email has been verified
-	Timezone           *string                 `json:"timezone,omitempty"`                                      // Optional field for user's timezone
-	CreatedAt          time.Time               `json:"created_at"`                                              // Timestamp of when the user was created
-	UpdatedAt          time.Time               `json:"updated_at"`                                              // Timestamp of when the user was last updated
+	ReviewsCount       *int                    `json:"reviews_count,omitempty"`
+	ProjectsCount      *int                    `json:"projects_count,omitempty"`
+	FeedbacksGiven     *int                    `json:"feedbacks_given,omitempty"`
+	FeedbacksReceived  *int                    `json:"feedbacks_received,omitempty"`
+	UserSettings       *map[string]interface{} `json:"user_settings,omitempty"`                                    // Optional field for user-specific settings
+	AccountType        *string                 `json:"account_type,omitempty" binding:"oneof=standard premium"`    // Optional field for user account type (standard, premium)
+	TwoFactorEnabled   *bool                   `json:"two_factor_enabled,omitempty"`                               // Indicates if 2FA is enabled
+	SignUpSource       *string                 `json:"sign_up_source,omitempty" binding:"oneof=credentials oauth"` // Optional field for tracking the sign-up source
+	LastPasswordChange *time.Time              `json:"last_password_change,omitempty"`                             // Optional field for last password change
+	Suspended          *bool                   `json:"suspended,omitempty"`                                        // Indicates if the user account is suspended
+	EmailVerified      *bool                   `json:"email_verified,omitempty"`                                   // Indicates if the user's email has been verified
+	Timezone           *string                 `json:"timezone,omitempty"`                                         // Optional field for user's timezone
+	CreatedAt          time.Time               `json:"created_at"`                                                 // Timestamp of when the user was created
+	UpdatedAt          time.Time               `json:"updated_at"`                                                 // Timestamp of when the user was last updated
 }
 
 type UserSettings struct {
