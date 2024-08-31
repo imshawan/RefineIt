@@ -8,6 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/imshawan/RefineIt/helpers"
+	"github.com/imshawan/RefineIt/pkg/authentication"
+	"github.com/imshawan/RefineIt/pkg/password"
 	"github.com/imshawan/RefineIt/internal/user"
 	"github.com/imshawan/RefineIt/models"
 )
@@ -32,7 +34,7 @@ func SignIn(ctx *gin.Context) {
 		return
 	}
 
-	match, compareErr := helpers.ComparePassword(userReq.Password, existingUser.PasswordHash)
+	match, compareErr := password.ComparePassword(userReq.Password, existingUser.PasswordHash)
 	if compareErr != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, compareErr)
 	}
@@ -41,7 +43,7 @@ func SignIn(ctx *gin.Context) {
 		helpers.FormatAPIResponse(ctx, http.StatusForbidden, errors.New("invalid credentials"))
 		return
 	}
-	token, err := helpers.SignJWTToken(existingUser)
+	token, err := authentication.SignJWTToken(existingUser)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
 		return

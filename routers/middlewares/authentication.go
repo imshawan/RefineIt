@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/imshawan/RefineIt/helpers"
+	"github.com/imshawan/RefineIt/pkg/authentication"
 	"github.com/imshawan/RefineIt/internal/user"
 	"github.com/imshawan/RefineIt/models"
 )
@@ -25,7 +26,7 @@ func IsAuthenticated() gin.HandlerFunc {
 
 		// Extract the token
 		token := strings.TrimPrefix(authHeader, "Bearer ")
-		claims, err := helpers.ValidateJWTToken(token)
+		claims, err := authentication.ValidateJWTToken(token)
 		if err != nil {
 			helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, err)
 			ctx.Abort()

@@ -10,6 +10,7 @@ import (
 	"github.com/imshawan/RefineIt/helpers"
 	"github.com/imshawan/RefineIt/internal/user"
 	"github.com/imshawan/RefineIt/models"
+	"github.com/imshawan/RefineIt/pkg/password"
 )
 
 func UserProfile(ctx *gin.Context) {
@@ -43,7 +44,7 @@ func RegisterUser(ctx *gin.Context) {
 	}
 
 	// Hash the password
-	hashedPassword, err := helpers.HashPassword(userReq.Password)
+	hashedPassword, err := password.HashPassword(userReq.Password)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusConflict, err)
 		return
