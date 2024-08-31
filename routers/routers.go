@@ -32,10 +32,13 @@ func SetupRouters() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middlewares.CORSMiddleware())
+	
+	router.Static("/assets", viper.GetString("ASSETS_DIR"))
 
 	registerInternalRoutes(router) //Internal routes registeration
 	RegisterUserRoutes(router.Group("/api/users"))
 	RegisterAuthRoutes(router.Group("/api/auth"))
+	RegisterCommonRoutes(router.Group("/api/common"))
 
 	return router
 }
