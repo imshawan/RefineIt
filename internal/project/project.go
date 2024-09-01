@@ -89,7 +89,7 @@ func CreateProject(project models.Project) (models.Project, error) {
 		}
 		fmt.Println(errs)
 		// Handle other errors
-		return project, fmt.Errorf("error inserting project into the database: %w", err)
+		return project, fmt.Errorf("error inserting project into the database")
 	}
 
 	return project, nil
