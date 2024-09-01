@@ -74,8 +74,15 @@ func ValidateRequestFields(model interface{}) gin.HandlerFunc {
 				for _, e := range errs {
 					field := e.Field()
 					tag := e.Tag()
+					param := e.Param()
+					parts := strings.Split(param, " ")
+					msg := fmt.Sprintf("%s (%s)", field, tag)
+					
+					if len(parts) > 1 {
+						msg = fmt.Sprintf("%s (%s - %s)", field, tag, strings.Join(parts, ", "))
+					}
 					// Use field and tag to generate a meaningful error message
-					validationErrors = append(validationErrors, fmt.Sprintf("%s (%s)", field, tag))
+					validationErrors = append(validationErrors, msg)
 				}
 				errorMessage := fmt.Sprintf("validation failed: %s", strings.Join(validationErrors, ", "))
 				validationError = errors.New(errorMessage)

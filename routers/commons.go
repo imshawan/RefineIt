@@ -8,4 +8,5 @@ import (
 
 func RegisterCommonRoutes(router *gin.RouterGroup) {
 	router.POST("/file-upload", middlewares.IsAuthenticated(), services.UploadFiles)
+	router.GET("/detect-language", middlewares.IsAuthenticated(), services.DetectlanguageByFilename)
 }

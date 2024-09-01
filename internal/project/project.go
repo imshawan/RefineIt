@@ -1,0 +1,96 @@
+package project
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/imshawan/RefineIt/helpers"
+	"github.com/imshawan/RefineIt/infra/database"
+	"github.com/imshawan/RefineIt/models"
+	"github.com/lib/pq"
+)
+
+var Fields = []string{
+	"id", "name", "slug", "description", "review_type", "repository_url", "filename", "file_url", "visibility", "owner_id",
+	"tags", "reviews_count", "stars_count", "last_reviewed_at", "is_featured", "contributors_count",
+	"priority", "created_at", "updated_at",
+}
+
+func CreateProject(project models.Project) (models.Project, error) {
+
+	if project.OwnerID == "" {
+		return project, errors.New("owner_id is required")
+	}
+	
+	if project.Tags == nil || len(project.Tags) == 0 {
+		project.Tags = []string{}
+	}
+
+	if project.Priority == "" {
+		project.Priority = "medium"
+	} else {
+		project.Priority = strings.ToLower(project.Priority)
+	}
+
+	if project.ReviewsCount == nil {
+		defaultReviewsCount := 0
+		project.ReviewsCount = &defaultReviewsCount
+	}
+
+	if project.StarsCount == nil {
+		defaultStarsCount := 0
+		project.StarsCount = &defaultStarsCount
+	}
+
+	if project.IsFeatured == nil {
+		defaultIsFeatured := false
+		project.IsFeatured = &defaultIsFeatured
+	}
+
+	if project.ContributorsCount == nil {
+		defaultContributorsCount := int64(0)
+		project.ContributorsCount = &defaultContributorsCount
+	}
+
+	if project.IsFeatured == nil {
+		defaultIsFeatured := false
+		project.IsFeatured = &defaultIsFeatured
+	}
+
+	now := time.Now()
+	id, err := helpers.GenerateUUID()
+	if err != nil {
+		return project, err
+	}
+
+	project.ID = id
+	project.CreatedAt = now
+	project.UpdatedAt = now
+
+	projectFields := strings.Join(Fields, ", ")
+
+	count := len(Fields)
+	query := fmt.Sprintf("INSERT INTO projects (%s) VALUES (%s) RETURNING %s", projectFields, database.GeneratePlaceholders(count, "$%d"), projectFields)
+
+	errs := database.Client.QueryRow(query, project.ID, project.Name, project.Slug, project.Description, project.ReviewType, project.RepositoryURL, project.Filename, project.FileUrl,
+		project.Visibility, project.OwnerID, pq.Array(project.Tags), project.ReviewsCount, project.StarsCount,
+		project.LastReviewedAt, project.IsFeatured, project.ContributorsCount,
+		project.Priority, project.CreatedAt, project.UpdatedAt).Scan(&project.ID, &project.Name, &project.Slug, &project.Description, &project.ReviewType, &project.RepositoryURL, &project.Filename, &project.FileUrl,
+		&project.Visibility, &project.OwnerID, pq.Array(&project.Tags), &project.ReviewsCount, &project.StarsCount,
+		&project.LastReviewedAt, &project.IsFeatured, &project.ContributorsCount,
+		&project.Priority, &project.CreatedAt, &project.UpdatedAt)
+
+	if errs != nil {
+		// Check for unique violation error code
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return project, fmt.Errorf(helpers.ExtractUniqueFieldError(pqErr.Detail))
+		}
+		fmt.Println(errs)
+		// Handle other errors
+		return project, fmt.Errorf("error inserting project into the database: %w", err)
+	}
+
+	return project, nil
+}
