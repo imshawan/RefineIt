@@ -12,7 +12,7 @@ import (
 	"github.com/lib/pq"
 )
 
-var Fields = []string{
+var ProjectFields = []string{
 	"id", "name", "slug", "description", "review_type", "repository_url", "filename", "file_url", "visibility", "owner_id",
 	"tags", "reviews_count", "stars_count", "last_reviewed_at", "is_featured", "contributors_count",
 	"priority", "created_at", "updated_at",
@@ -69,9 +69,9 @@ func CreateProject(project models.Project) (models.Project, error) {
 	project.CreatedAt = now
 	project.UpdatedAt = now
 
-	projectFields := strings.Join(Fields, ", ")
+	projectFields := strings.Join(ProjectFields, ", ")
 
-	count := len(Fields)
+	count := len(ProjectFields)
 	query := fmt.Sprintf("INSERT INTO projects (%s) VALUES (%s) RETURNING %s", projectFields, database.GeneratePlaceholders(count, "$%d"), projectFields)
 
 	errs := database.Client.QueryRow(query, project.ID, project.Name, project.Slug, project.Description, project.ReviewType, project.RepositoryURL, project.Filename, project.FileUrl,
