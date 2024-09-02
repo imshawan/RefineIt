@@ -28,3 +28,6 @@ app:
 website:
 	cd web/website && \
 	npm install && npm run build
+
+build:
+	go build -o bin/ main.go
