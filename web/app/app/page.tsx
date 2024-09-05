@@ -1,40 +1,27 @@
-"use client"
-
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { getNextServerSession } from "@refineit/lib/auth";
 import Navigation from "@refineit/components/common/navbar";
-import HomeScreen from "@refineit/components/home";
 import { BaseContainer } from "@refineit/components/common";
+import {ProjectsSection, Feeds} from "@refineit/components/home";
+import { UserTokenStore, IUserTokenInfo } from "@refineit/lib";
 
-export default function Home() {
-    const { data, status } = useSession();
-    const router = useRouter();
-
-    React.useEffect(() => {
-        if (status === "loading") {
-            // Still loading session, do nothing
-            return;
-        }
-
-        if (!data) {
-            // Redirect to sign-in page if not authenticated
-            router.push("/sign-in");
-        } else if (data) {
-            // Optionally, redirect logged-in users to a different page
-            // router.push("/dashboard");
-        }
-    }, [data, status, router]);
-
-    if (status !== "authenticated") {
-        return <div>Loading...</div>;
+export default async function Home() {
+    const session = await getNextServerSession();
+    if (session && session.user) {
+        let user = session.user as IUserTokenInfo;
+        UserTokenStore.setTokenInfo(user);
     }
 
     return (
         <React.Fragment>
             <Navigation />
             <BaseContainer>
-                <HomeScreen />
+                <div className="block md:flex mx-0 xl:px-8 surface-50 feeds-section overflow-hidden">
+                    {session && <ProjectsSection projects={[]} />}
+                    <Feeds />
+                </div>
             </BaseContainer>
         </React.Fragment>
     )

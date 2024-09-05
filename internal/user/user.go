@@ -12,6 +12,8 @@ import (
 	"github.com/lib/pq"
 )
 
+var PublicFields = []string{"id", "username", "email", "fullname", "created_at", "updated_at", "is_active"}
+
 // GetUserByField retrieves a user by a specified field and value
 func GetUserByField(ctx *gin.Context, field string, value string, includePasswordHash ...bool) (models.User, error) {
 	var user models.User

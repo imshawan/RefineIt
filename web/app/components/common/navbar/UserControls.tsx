@@ -67,7 +67,7 @@ export default function UserControls() {
                 <Avatar
                     image="https://www.imshawan.dev/assets/img/profile-img.jpg"
                     shape="circle"
-                    className="cursor-pointer mx-2 my-auto"
+                    className="cursor-pointer mx-2 my-auto overflow-hidden"
                     style={{ height: "40px", width: "40px" }}
                     onClick={(e) => profileMenu.current?.toggle(e)}
                 />

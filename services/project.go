@@ -55,7 +55,12 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 	Page := 1
 	Limit := 10
 
-	page, exists := ctx.GetQuery("page"); if exists {
+	ownerFields := []string{"fullname", "username", "profile_picture"}
+
+	options = append(options, project.WithOwner(true), project.WithOwnerFields(ownerFields))
+
+	page, exists := ctx.GetQuery("page")
+	if exists {
 		pageInt, err := strconv.Atoi(page)
 		if err == nil { // Only append the option if the conversion is successful
 			Page = pageInt
@@ -65,7 +70,8 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 		options = append(options, project.WithPage(1))
 	}
 
-	limit, exists := ctx.GetQuery("limit"); if exists {
+	limit, exists := ctx.GetQuery("limit")
+	if exists {
 		limitInt, err := strconv.Atoi(limit)
 		if err == nil {
 			Limit = limitInt
@@ -75,11 +81,13 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 		options = append(options, project.WithPageSize(10))
 	}
 
-	sortBy, exists := ctx.GetQuery("sortBy"); if exists {
+	sortBy, exists := ctx.GetQuery("sortBy")
+	if exists {
 		options = append(options, project.WithSortBy(sortBy))
 	}
 
-	search, exists := ctx.GetQuery("search"); if exists {
+	search, exists := ctx.GetQuery("search")
+	if exists {
 		options = append(options, project.WithSearch(search))
 	}
 

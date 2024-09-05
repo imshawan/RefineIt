@@ -4,7 +4,7 @@ import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
 import { Tag } from "primereact/tag";
 import { ScrollPanel } from "primereact/scrollpanel";
-import { ProgressBar } from "primereact/progressbar";
+// import ProjectsSection from "./ProjectsSection";
 
 const GithubLikeUI: React.FC = () => {
     const myProjects = [
@@ -220,29 +220,7 @@ const GithubLikeUI: React.FC = () => {
         <div
             className="block md:flex mx-0 xl:px-8 surface-50 feeds-section overflow-hidden">
 
-            <div className="w-12 md:w-5 lg:w-3 p-3">
-                <Card
-                    style={{ backgroundColor: "#34495e", color: "#ecf0f1" }}
-                >
-                    <div className="px-3 mb-3 flex justify-content-between">
-                        <h3 className="m-0 my-auto">My Projects</h3>
-                        <Button
-                            icon="pi pi-plus"
-                            className="p-button-sm my-auto py-1 px-4"
-                        />
-                    </div>
-                    <ul className="list-none p-0 m-0">
-                        {myProjects.map((project, index) => (
-                            <li key={index} className="mb-3 px-3">
-                                <div className="text-sm">
-                                    {project.name}
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-
-                </Card>
-            </div>
+            {/* <ProjectsSection projects={myProjects} /> */}
 
             {/* Feeds Section */}
             <div className="w-12 md:w-7 lg:w-9 pl-3">

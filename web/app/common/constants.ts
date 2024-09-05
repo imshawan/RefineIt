@@ -11,6 +11,9 @@ export const endpoints = {
     },
     GITHUB: {
         REPOSITORY_SEARCH: "/api/github/search-code/?{{query}}"
+    },
+    PROJECTS: {
+        GET_ALL: API_SERVER_HOST + "/api/projects/?{{query}}"
     }
 }
 

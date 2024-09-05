@@ -25,4 +25,23 @@ export namespace ApiResponse {
         }
         response: string | Array | object
     }
+
+    interface IPaginationResponse extends IBaseResponse {
+        response: IPagination
+    }
+
+    interface IPagination {
+        data: Array<any>;
+        current_page: number;
+        per_page: number;
+        total_pages: number;
+        total_items: number;
+        navigation: INavigation;
+    }
+
+    interface INavigation {
+        current: string;
+        next: string;
+        previous: string;
+    }
 }

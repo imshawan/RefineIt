@@ -25,7 +25,7 @@ const Navigation: React.FC = () => {
             command: () => router.push("/")
         },
         {
-            label: "Code Reviews",
+            label: "Reviews",
             icon: "pi pi-fw pi-code",
             items: [
                 { label: "My Reviews", icon: "pi pi-fw pi-user-edit", command: () => router.push("/reviews/my") },

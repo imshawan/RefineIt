@@ -2,6 +2,7 @@ import _ from "lodash";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_SERVER_HOST } from "@refineit/common";
 import { ApiResponse } from "@refineit/types/response";
+import { UserTokenStore } from "@refineit/lib";
 
 const handleLogout = (): void => {
     // ["user", "authenticated", "token"].forEach(e => localStorage.removeItem(e));
@@ -35,6 +36,13 @@ const axiosInstance: AxiosInstance = axios.create({
 
 const doRequest = async <T>(url: string, method: keyof AxiosInstance, config: AxiosRequestConfig = {}, data?: any, external: boolean = false): Promise<T> => {
     let instance: AxiosInstance = external ? axios : axiosInstance;
+
+    if (!external) {
+        if (!config.headers) {
+            config.headers = {};
+        }
+        config.headers["Authorization"] = "Bearer " + UserTokenStore.getJwtToken();
+    }
 
     try {
         let response: AxiosResponse<T>;
