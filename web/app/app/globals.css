@@ -76,7 +76,7 @@ body {
 }
 
 .p-icon-badge-button:focus {
-    background-color: var(--cyan-100);
+    background-color: rgba(107, 107, 107, .06);
 }
 
 .feeds-section .p-card {

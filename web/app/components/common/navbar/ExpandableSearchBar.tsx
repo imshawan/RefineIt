@@ -3,9 +3,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import "primereact/resources/primereact.min.css";
-import "primeflex/primeflex.css";
-import "primeicons/primeicons.css";
 
 interface SearchBarProps {
     onValueChange?: (value: string) => void;
@@ -40,10 +37,11 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
     };
 
     return (
-        <div ref={containerRef} className={"relative h-3rem"}
+        <div ref={containerRef} className={"relative"}
             style={{
                 width: expanded ? "21rem" : "3rem",
                 transition: "width 0.3s ease-in-out",
+                marginTop: "2px"
             }}>
             <div
                 className={"inset-0 flex items-center " + (expanded ? "w-full" : "")}
@@ -59,11 +57,11 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
                     onChange={valueOnChange}
                     // onKeyPress={handleKeyPress}
                     placeholder="Search"
-                    className="w-full pr-3rem"
+                    className="w-full pr-3rem p-inputtext-sm"
                 />
             </div>
             <Button onClick={toggleExpand} className="p-button-sm p-button-icon-only p-button-link p-button-text absolute right-0 top-0 z-1 p-icon-badge-button">
-                <i className={"pi p-overlay-badge mt-1 text-black-alpha-60 pi-" + (expanded ? "times" : "search")} style={{ fontSize: "1.2rem" }} />
+                <i className={"pi p-overlay-badge text-black-alpha-60 pi-" + (expanded ? "times" : "search")} style={{ fontSize: "1.2rem" }} />
             </Button>
         </div>
     );
