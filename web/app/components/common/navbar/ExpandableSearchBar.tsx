@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import _ from "lodash";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+import { useProject } from "@refineit/app/project/hooks";
 
 interface SearchBarProps {
     onValueChange?: (value: string) => void;
@@ -10,8 +12,8 @@ interface SearchBarProps {
 }
 
 const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}) => {
+    const {setSearch, loadInitialProjects} = useProject();
     const [expanded, setExpanded] = useState(false);
-    const [searchValue, setSearchValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -26,15 +28,16 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
         setExpanded(!expanded);
         if (!expanded) {
             setTimeout(() => inputRef.current?.focus(), 100);
+        } else {
+            setSearch("");
+            loadInitialProjects();
         }
     };
 
-    const valueOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(event.target.value);
-        if (onValueChange && typeof onValueChange === "function") {
-            onValueChange(event.target.value);
-        }
-    };
+    const valueOnChange = _.debounce((event: React.ChangeEvent<HTMLInputElement>) => {
+        let term = event.target.value;
+        setSearch(term);
+    }, 500);
 
     return (
         <div ref={containerRef} className={"relative"}
@@ -52,7 +55,6 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
             >
                 <InputText
                     ref={inputRef}
-                    value={searchValue}
                     onChange={valueOnChange}
                     // onKeyPress={handleKeyPress}
                     placeholder="Search"

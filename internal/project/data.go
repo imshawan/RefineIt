@@ -73,7 +73,7 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 		query = fmt.Sprintf(`SELECT %s, jsonb_build_object(%s) AS owner FROM projects as project LEFT JOIN users ON project.owner_id = users.id `, fieldList, ownerFieldList)
 	}
 
-	query += " WHERE (project.name ILIKE $1 OR project.description ILIKE $1) "
+	query += " WHERE (project.name ILIKE $1 OR project.slug ILIKE $1 OR project.description ILIKE $1) "
 
 	// Sorting options
 	sortOptions := map[string]string{
@@ -94,7 +94,7 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 
 	// Query to get the total number of documents
 	countQuery := `SELECT COUNT(*) FROM projects
-        WHERE (name ILIKE $1 OR description ILIKE $1)`
+        WHERE (name ILIKE $1 OR slug ILIKE $1 OR description ILIKE $1)`
 
 	query += " ORDER BY " + sortOrder
 

@@ -24,7 +24,11 @@ function* onProjectsLoadPaginated({ payload }: { payload: IProjectFetchPayload }
         const data: string | ApiResponse.IBaseResponse = yield call(getProjects, payload);
         if (typeof data === "object") {
             let {data: projects, ...rest} = data.response;
-            yield put(projectActions.pushProjects(projects));
+            if (!payload.page || payload.page <= 1) {
+                yield put(projectActions.setProjects(projects));
+            } else {
+                yield put(projectActions.pushProjects(projects));
+            }
             yield put(projectActions.setLoading(false));
             yield put(projectActions.setPagination(rest));
         }

@@ -5,7 +5,7 @@ import { AppState } from "../store";
 
 interface IProjectState {
     loading: boolean;
-    search?: string;
+    searchTerm?: string;
     projects: IProject[];
     pagination: IPagination
 }
@@ -21,7 +21,7 @@ interface IPagination {
 const initialState: IProjectState = {
     loading: true,
     projects: [],
-    search: "",
+    searchTerm: "",
     pagination: {
         current_page: 0,
         navigation: {current: "", next: "", previous: ""},
@@ -39,7 +39,7 @@ export const projectSlice = createSlice({
             state.loading = action.payload;
         },
         setSearch(state, action) {
-            state.search = action.payload;
+            state.searchTerm = action.payload;
         },
         setPagination(state, action) {
             state.pagination = action.payload;
@@ -80,6 +80,7 @@ export const getters = {
     loading: (state: AppState) => state.project.loading,
     projects: (state: AppState) => state.project.projects,
     pagination: (state: AppState) => state.project.pagination,
+    searchTerm: (state: AppState) => state.project.searchTerm
 };
 
 export const projectReducer = projectSlice.reducer;

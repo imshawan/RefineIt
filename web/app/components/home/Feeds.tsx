@@ -27,17 +27,24 @@ const useStyles = tss.create({
 export const Feeds: React.FC = () => {
     const { classes } = useStyles();
     const { data: session } = useSession();
-    const { projects, loading, pagination, loadInitialProjects, loadProjectsPaginated, setLoading } = useProject();
+    const { projects, loading, pagination, loadInitialProjects, loadProjectsPaginated, setLoading, searchTerm } = useProject();
 
     const [trending, setTrending] = React.useState<any>([]);
     const [suggestions, setSuggestions] = React.useState<any>([]);
+    const [canLoadNext, setCanLoadNext] = React.useState(true);
 
     const user = React.useMemo(() => session?.user, [session?.user]);
+    const next = React.useMemo(() => pagination.navigation.next, [pagination.navigation.next]);
 
     const loadMore = () => {
         if (pagination.navigation.next) {
+            let obj: any = {page: pagination.current_page + 1};
+            if (searchTerm) {
+                obj.q = searchTerm;
+            }
+            
             setLoading(true);
-            loadProjectsPaginated({ page: pagination.current_page + 1 });
+            loadProjectsPaginated(obj);
         }
     }
 
@@ -48,6 +55,17 @@ export const Feeds: React.FC = () => {
         loadInitialProjects();
 
     }, [user]);
+
+    React.useEffect(() => {
+        if (!searchTerm) return;
+        if (searchTerm?.length > 1) {
+            loadProjectsPaginated({ q: searchTerm, page: 1 });
+        }
+    }, [searchTerm]);
+
+    React.useEffect(() => {
+        setCanLoadNext(Boolean(next));
+    }, [next]);
 
     return (
         <div className="w-12 md:w-7 lg:w-9 pl-3">
@@ -62,7 +80,7 @@ export const Feeds: React.FC = () => {
 
                         {projects && projects.length && <div className="w-full">
                             <div className={classes.loadMore}>
-                                {!loading && <Button onClick={loadMore} className="w-full p-button-sm p-button-link text-color" label="Load more" />}
+                                {!loading && canLoadNext && <Button onClick={loadMore} className="w-full p-button-sm p-button-link text-color" label="Load more" />}
                                 {loading && <ProgressSpinner style={{width: "30px", height: "30px"}} strokeWidth="4" animationDuration=".5s" />}
                             </div>
                         </div>}

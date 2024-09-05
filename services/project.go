@@ -86,7 +86,7 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 		options = append(options, project.WithSortBy(sortBy))
 	}
 
-	search, exists := ctx.GetQuery("search")
+	search, exists := ctx.GetQuery("q")
 	if exists {
 		options = append(options, project.WithSearch(search))
 	}

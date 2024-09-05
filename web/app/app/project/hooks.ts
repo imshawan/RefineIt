@@ -22,6 +22,7 @@ export const useProject = () => {
 
         loading: useAppSelector(getters.loading),
         projects: useAppSelector(getters.projects),
-        pagination: useAppSelector(getters.pagination)
+        pagination: useAppSelector(getters.pagination),
+        searchTerm: useAppSelector(getters.searchTerm)
     }
 }
