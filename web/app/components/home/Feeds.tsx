@@ -12,10 +12,15 @@ import { IProject } from "@refineit/types";
 import { useProject } from "@refineit/app/project/hooks";
 import SkeletonLoader from "./SkeletonLoader";
 import ProjectCard from "./Project";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const useStyles = tss.create({
     loadMore: {
-        margin: "0px .25rem 1.2rem .25rem"
+        margin: "0px .25rem 1.2rem .25rem",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%"
     }
 });
 
@@ -48,7 +53,8 @@ export const Feeds: React.FC = () => {
 
                         {projects && projects.length && <div className="w-full">
                             <div className={classes.loadMore}>
-                                <Button className="w-full p-button-sm p-button-text text-color" label="Load more" />
+                                {!loading && <Button className="w-full p-button-sm p-button-link text-color" label="Load more" />}
+                                {loading && <ProgressSpinner style={{width: "30px", height: "30px"}} strokeWidth="4" animationDuration=".5s" />}
                             </div>
                         </div>}
                     </div>
