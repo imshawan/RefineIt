@@ -39,12 +39,11 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
     return (
         <div ref={containerRef} className={"relative"}
             style={{
-                width: expanded ? "21rem" : "3rem",
-                transition: "width 0.3s ease-in-out",
-                marginTop: "2px"
+                width: expanded ? "22rem" : "2rem",
+                transition: "width 0.3s ease-in-out"
             }}>
             <div
-                className={"inset-0 flex items-center " + (expanded ? "w-full" : "")}
+                className={"inset-0 flex items-center h-full w-full"}
                 style={{
                     opacity: expanded ? 1 : 0,
                     pointerEvents: expanded ? "auto" : "none",
@@ -57,10 +56,10 @@ const ExpandableSearchBar: React.FC<SearchBarProps> = ({onValueChange, onExpand}
                     onChange={valueOnChange}
                     // onKeyPress={handleKeyPress}
                     placeholder="Search"
-                    className="w-full pr-3rem p-inputtext-sm"
+                    className="w-full h-full pr-3rem p-inputtext-sm"
                 />
             </div>
-            <Button onClick={toggleExpand} className="p-button-sm p-button-icon-only p-button-link p-button-text absolute right-0 top-0 z-1 p-icon-badge-button">
+            <Button onClick={toggleExpand} className="p-button-sm h-full p-button-icon-only p-button-link p-button-text absolute right-0 top-0 z-1 p-icon-badge-button">
                 <i className={"pi p-overlay-badge text-black-alpha-60 pi-" + (expanded ? "times" : "search")} style={{ fontSize: "1.2rem" }} />
             </Button>
         </div>

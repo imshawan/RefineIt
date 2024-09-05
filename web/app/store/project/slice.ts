@@ -5,6 +5,7 @@ import { AppState } from "../store";
 
 interface IProjectState {
     loading: boolean;
+    search?: string;
     projects: IProject[];
     pagination: IPagination
 }
@@ -20,6 +21,7 @@ interface IPagination {
 const initialState: IProjectState = {
     loading: true,
     projects: [],
+    search: "",
     pagination: {
         current_page: 0,
         navigation: {current: "", next: "", previous: ""},
@@ -36,6 +38,9 @@ export const projectSlice = createSlice({
         setLoading(state, action) {
             state.loading = action.payload;
         },
+        setSearch(state, action) {
+            state.search = action.payload;
+        },
         setPagination(state, action) {
             state.pagination = action.payload;
         },
@@ -43,7 +48,7 @@ export const projectSlice = createSlice({
             state.projects = action.payload;
         },
         pushProjects(state, action) {
-            state.projects.push(action.payload);
+            state.projects = state.projects.concat(action.payload);
         },
         deleteProject(state, action) {
             state.projects = state.projects.filter((project) => project.id !== action.payload);
@@ -57,11 +62,13 @@ export const projectSlice = createSlice({
 
 export const projectActions = {
     loadProjectsDispatch: createAction(`${projectSlice.name}/set-projects`, (payload) => ({ payload })),
+    loadProjectsPaginatedDispatch: createAction(`${projectSlice.name}/load-projects-paginated`, (payload) => ({ payload })),
     pushProjectsDispatch: createAction(`${projectSlice.name}/add-project`, (payload) => ({ payload })),
     deleteProjectDispatch: createAction(`${projectSlice.name}/delete-project`, (payload) => ({ payload })),
     updateProjectDispatch: createAction(`${projectSlice.name}/update-project`, (payload) => ({ payload })),
     
     setLoading: projectSlice.actions.setLoading,
+    setSearch: projectSlice.actions.setSearch,
     setPagination: projectSlice.actions.setPagination,
     setProjects: projectSlice.actions.setProjects,
     pushProjects: projectSlice.actions.pushProjects,

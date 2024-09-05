@@ -27,18 +27,27 @@ const useStyles = tss.create({
 export const Feeds: React.FC = () => {
     const { classes } = useStyles();
     const { data: session } = useSession();
-    const { projects, loading, pagination, loadProjects } = useProject();
+    const { projects, loading, pagination, loadInitialProjects, loadProjectsPaginated, setLoading } = useProject();
 
     const [trending, setTrending] = React.useState<any>([]);
     const [suggestions, setSuggestions] = React.useState<any>([]);
 
+    const user = React.useMemo(() => session?.user, [session?.user]);
+
+    const loadMore = () => {
+        if (pagination.navigation.next) {
+            setLoading(true);
+            loadProjectsPaginated({ page: pagination.current_page + 1 });
+        }
+    }
+
     React.useEffect(() => {
-        if (!session || !session.user) return;
+        if (!user || !Object.keys(user).length) return;
 
         UserTokenStore.setTokenInfo(session?.user as IUserTokenInfo);
-        loadProjects({});
+        loadInitialProjects();
 
-    }, [loadProjects, session]);
+    }, [user]);
 
     return (
         <div className="w-12 md:w-7 lg:w-9 pl-3">
@@ -53,7 +62,7 @@ export const Feeds: React.FC = () => {
 
                         {projects && projects.length && <div className="w-full">
                             <div className={classes.loadMore}>
-                                {!loading && <Button className="w-full p-button-sm p-button-link text-color" label="Load more" />}
+                                {!loading && <Button onClick={loadMore} className="w-full p-button-sm p-button-link text-color" label="Load more" />}
                                 {loading && <ProgressSpinner style={{width: "30px", height: "30px"}} strokeWidth="4" animationDuration=".5s" />}
                             </div>
                         </div>}

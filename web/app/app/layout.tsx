@@ -7,6 +7,8 @@ import { PrimeReactProvider } from "primereact/api";
 import { Inter } from "next/font/google";
 import { SessionProvider, SessionProviderProps } from "next-auth/react";
 import { Toaster } from "sonner";
+import { NextAppDirEmotionCacheProvider } from "tss-react/next/appDir";
+
 import "primereact/resources/themes/saga-blue/theme.css";   // or any other theme
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -33,7 +35,9 @@ export default function RootLayout({ children, session }: {
                 <SessionProvider session={session}>
                     <Provider store={store}>
                         <PrimeReactProvider value={{ appendTo: "self", ripple: true }}>
+                        <NextAppDirEmotionCacheProvider options={{ key: "css" }}>
                             {children}
+                        </NextAppDirEmotionCacheProvider>
                             <Toaster position="top-right" richColors />
                         </PrimeReactProvider>
                     </Provider>

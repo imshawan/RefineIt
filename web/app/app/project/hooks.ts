@@ -1,16 +1,22 @@
 import React from "react";
-import { projectActions, getters } from "@refineit/store/project";
+import { projectActions, getters, IProjectFetchPayload } from "@refineit/store/project";
 import { useAppDispatch, useAppSelector } from "@refineit/hooks/hook";
 
 export const useProject = () => {
     const dispatch = useAppDispatch();
 
     return {
-        loadProjects: React.useCallback((payload: any) => {
+        loadInitialProjects: React.useCallback((payload?: IProjectFetchPayload) => {
             dispatch(projectActions.loadProjectsDispatch(payload));
+        }, [dispatch]),
+        loadProjectsPaginated: React.useCallback((payload?: IProjectFetchPayload) => {
+            dispatch(projectActions.loadProjectsPaginatedDispatch(payload));
         }, [dispatch]),
         setLoading: React.useCallback((payload: boolean) => {
             dispatch(projectActions.setLoading(payload));
+        }, [dispatch]),
+        setSearch: React.useCallback((payload: string) => {
+            dispatch(projectActions.setSearch(payload));
         }, [dispatch]),
 
 

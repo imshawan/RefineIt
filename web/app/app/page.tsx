@@ -1,6 +1,4 @@
 import React from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { getNextServerSession } from "@refineit/lib/auth";
 import Navigation from "@refineit/components/common/navbar";
 import { BaseContainer } from "@refineit/components/common";
