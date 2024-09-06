@@ -3,13 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_SERVER_HOST } from "@refineit/common";
 import { ApiResponse } from "@refineit/types/response";
 import { UserTokenStore } from "@refineit/lib";
-
-const handleLogout = (): void => {
-    // ["user", "authenticated", "token"].forEach(e => localStorage.removeItem(e));
-
-    // Redirect to login page
-    // window.location.href = "/sign-in";
-};
+import { signOut } from "next-auth/react";
 
 // Utility function to get headers
 const getHeaders = (config: AxiosRequestConfig = {}, isFormData = false): AxiosRequestConfig["headers"] => {
@@ -116,7 +110,7 @@ function handleApiError(error: any, external: boolean = false) {
     if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         if (status === 401 && !external && typeof window !== "undefined") {
-            if (window.location.pathname !== "/signin") handleLogout();
+            if (window.location.pathname !== "/signin") signOut({callbackUrl: "/sign-in"});
         }
     }
 }

@@ -8,6 +8,7 @@ import { Menu } from "primereact/menu";
 import { useRouter } from "next/navigation";
 import ExpandableSearchBar from "./ExpandableSearchBar";
 import { useBreakpoints } from "@refineit/hooks";
+import { signOut } from "next-auth/react";
 
 export default function UserControls() {
     const router = useRouter();
@@ -37,7 +38,9 @@ export default function UserControls() {
         {
             label: "Logout",
             icon: "pi pi-fw pi-power-off",
-            command: () => router.push("/logout")
+            command: () => {
+                signOut({ callbackUrl: "/sign-in" });
+            }
         }
     ]);
 

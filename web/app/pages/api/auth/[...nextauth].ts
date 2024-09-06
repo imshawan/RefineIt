@@ -65,7 +65,7 @@ export const authOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user && Object.keys(user).length) {
-                let _user = user as ApiResponse.ISignInUser;
+                let _user = user as any;
                 token.id = _user.id;
                 token.email = _user.email;
                 token.name = _user.fullname;
