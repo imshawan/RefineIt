@@ -8,6 +8,7 @@ CREATE TABLE
     name TEXT NOT NULL,
     slug TEXT NOT NULL,
     description TEXT NOT NULL,
+    about TEXT DEFAULT '',
     review_type VARCHAR(255) NOT NULL,
     repository_url TEXT,
     filename TEXT NOT NULL,

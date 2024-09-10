@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
 import { tss } from "tss-react";
 import { Badge } from "primereact/badge";
-import { IProject } from "@refineit/types";
+import { BadgeSeverityType, IProject } from "@refineit/types";
 import { useRouter } from "next/navigation";
 import { ActionMenu } from "../common";
 import OwnerInfo from "./OwnerInfo";
@@ -13,8 +13,6 @@ import OwnerInfo from "./OwnerInfo";
 interface ProjectCardProps {
     project: IProject;
 }
-
-type SeverityType = "warning" | "danger" | "success" | "info" | null | undefined;
 
 export const useStyles = tss.create({
     card: {
@@ -121,7 +119,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     const router = useRouter();
     const link = `/${project.owner.username}/${project.slug}`;
 
-    const priorities: Record<string, SeverityType> = {
+    const priorities: Record<string, BadgeSeverityType> = {
         "low": "info",
         "medium": "warning",
         "high": "danger",

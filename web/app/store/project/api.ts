@@ -26,3 +26,19 @@ export const getProjects = async (payload?: IProjectFetchPayload) => {
         return http.parseHttpError(err);
     }
 }
+
+export const getProjectBySlug = async (payload: {slug: string}) => {
+    try {
+        return await http.get<ApiResponse.IBaseResponse>(parseParams(endpoints.PROJECTS.GET_BY_SLUG, payload));
+    } catch (err: any) {
+        return http.parseHttpError(err);
+    }
+}
+
+export const createProject = async (payload: any) => {
+    try {
+        return await http.post<ApiResponse.IBaseResponse>(endpoints.PROJECTS.CREATE, payload);
+    } catch (err: any) {
+        return http.parseHttpError(err);
+    }
+}

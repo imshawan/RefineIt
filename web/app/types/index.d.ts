@@ -6,3 +6,5 @@ export * from "./project";
 export type MutableObject = {
     [key: string]: any;
 }
+
+export type BadgeSeverityType = "warning" | "danger" | "success" | "info" | null | undefined;

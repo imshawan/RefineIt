@@ -9,7 +9,7 @@ import { ScrollPanel } from "primereact/scrollpanel";
 import { tss } from "tss-react";
 import { IUserTokenInfo, UserTokenStore } from "@refineit/lib";
 import { IProject } from "@refineit/types";
-import { useProject } from "@refineit/app/project/hooks";
+import { useProject } from "@refineit/app/(project)/hooks";
 import SkeletonLoader from "./SkeletonLoader";
 import ProjectCard from "./Project";
 import { ProgressSpinner } from "primereact/progressspinner";

@@ -35,9 +35,9 @@ export default function RootLayout({ children, session }: {
                 <SessionProvider session={session}>
                     <Provider store={store}>
                         <PrimeReactProvider value={{ appendTo: "self", ripple: true }}>
-                        <NextAppDirEmotionCacheProvider options={{ key: "css" }}>
-                            {children}
-                        </NextAppDirEmotionCacheProvider>
+                            <NextAppDirEmotionCacheProvider options={{ key: "css" }}>
+                                {children}
+                            </NextAppDirEmotionCacheProvider>
                             <Toaster position="top-right" richColors />
                         </PrimeReactProvider>
                     </Provider>

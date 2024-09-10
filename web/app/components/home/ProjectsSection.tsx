@@ -17,7 +17,7 @@ export const ProjectsSection: React.FC<{projects: any}> = ({projects}) => {
                         icon="pi pi-plus"
                         iconPos="right"
                         className="p-button-sm p-button-contrast my-auto py-2 px-4"
-                        onClick={() => router.push("/project/create")}
+                        onClick={() => router.push("/create")}
                     />
                 </div>
                 <ul className="list-none p-0 m-0">

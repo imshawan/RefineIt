@@ -7,6 +7,7 @@ import (
 
 	"github.com/imshawan/RefineIt/infra/database"
 	"github.com/imshawan/RefineIt/internal/user"
+	"github.com/imshawan/RefineIt/models"
 	"github.com/lib/pq"
 )
 
@@ -104,12 +105,18 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 	var total int = 0
 	err := database.Client.QueryRow(countQuery, "%"+options.Search+"%").Scan(&total)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
+			return nil, 0, fmt.Errorf("error occured while data retrival due to schema mismatch")
+		}
 		return nil, 0, err
 	}
 
 	// Execute the query
 	rows, err := database.Client.Query(query, "%"+options.Search+"%")
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
+			return nil, 0, fmt.Errorf("error occured while data retrival due to schema mismatch")
+		}
 		return nil, 0, err
 	}
 	defer rows.Close()
@@ -229,4 +236,46 @@ func Includes(arr []string, str string) bool {
 		}
 	}
 	return false
+}
+
+func GetProjectBySlugWithOwner(slug string) (models.Project, error) {	
+	var fields []string
+	for _, field := range ProjectFields {
+		fields = append(fields, "project."+field)
+	}
+
+	var ownerFields []string
+	for _, field := range user.PublicFields {
+		ownerFields = append(ownerFields, fmt.Sprintf("'%s', users.%s", field, field))
+	}
+
+	ownerFieldList := strings.Join(ownerFields, ", ")
+
+	query := fmt.Sprintf(`
+		SELECT %s, 
+		jsonb_build_object(%s) AS owner FROM projects as project 
+		LEFT JOIN users ON project.owner_id = users.id WHERE project.slug = $1`, strings.Join(fields, ", "), ownerFieldList)
+
+	var projectData models.Project
+	var ownerRaw json.RawMessage 
+	err := database.Client.QueryRow(query, slug).Scan(&projectData.ID, &projectData.Name, &projectData.Slug, &projectData.Description, &projectData.About, &projectData.ReviewType, &projectData.RepositoryURL, &projectData.Filename, &projectData.FileUrl,
+		&projectData.Visibility, &projectData.OwnerID, pq.Array(&projectData.Tags), &projectData.ReviewsCount, &projectData.StarsCount,
+		&projectData.LastReviewedAt, &projectData.IsFeatured, &projectData.ContributorsCount,
+		&projectData.Priority, &projectData.CreatedAt, &projectData.UpdatedAt, &ownerRaw)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
+			return projectData, fmt.Errorf("error occured while data retrival due to schema mismatch")
+		}
+		return projectData, err
+	}
+
+	var ownerMap map[string]interface{}
+	err = json.Unmarshal(ownerRaw, &ownerMap)
+	if err != nil {
+		return projectData, err // Handle JSON unmarshal error
+	}
+
+	projectData.Owner = ownerMap
+
+	return projectData, nil
 }

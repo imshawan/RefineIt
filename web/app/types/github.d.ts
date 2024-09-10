@@ -41,6 +41,24 @@ export interface IGitHubFileContent extends Array {
     download_url: string | null; // download_url can be null for some file types
     type: "file" | "dir";
     _links: ILinks;
+    text_matches?: IFileContent[]
+}
+
+export interface IFileContent {
+    object_url: string;     // URL to the object (string)
+    object_type: string;    // Type of the object, here it's 'FileContent' (string)
+    property: string;       // Property name, e.g., 'content' (string)
+    fragment: string;
+    matches: any[];         // Matches array, can be empty or contain other data (any[] for flexibility)
+}
+
+export interface IBlobContent {
+    sha: string;       
+    node_id: string;   // A unique identifier for the blob
+    size: number;      // The size of the blob in bytes
+    url: string;       // The API URL to access the blob
+    content: string;   // The base64-encoded content of the blob
+    encoding: string;  // The encoding type, in this case "base64"
 }
 
 export interface IRepositoryInfo {

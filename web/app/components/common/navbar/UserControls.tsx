@@ -10,7 +10,7 @@ import ExpandableSearchBar from "./ExpandableSearchBar";
 import { useBreakpoints } from "@refineit/hooks";
 import { signOut } from "next-auth/react";
 
-export default function UserControls() {
+export default function UserControls({searchEnabled=true}) {
     const router = useRouter();
     const breakpoints = useBreakpoints();
     const [expanded, setExpanded] = useState(false);
@@ -54,7 +54,7 @@ export default function UserControls() {
 
     return (
         <div className={"flex " + (expanded ? "search-expanded" : "")}>
-            <ExpandableSearchBar onExpand={onSearchbarExpand} />
+            {searchEnabled && <ExpandableSearchBar onExpand={onSearchbarExpand} />}
             {!expanded && <React.Fragment>
                 <Button className="p-button-sm p-button-icon-only p-button-link hover:bg-gray-200 p-icon-badge-button">
                     <i className="pi pi-bell p-overlay-badge text-black-alpha-60" style={{ fontSize: "1.2rem" }}>

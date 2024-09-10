@@ -105,3 +105,20 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 
 	helpers.FormatAPIResponse(ctx, http.StatusOK, paginated)
 }
+
+func GetProjectBySlug(ctx *gin.Context) {
+	slug := ctx.Param("slug")
+
+	if len(slug) == 0 {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("slug is required"))
+		return
+	}
+
+	projectData, err := project.GetProjectBySlugWithOwner(slug)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusOK, projectData)
+}

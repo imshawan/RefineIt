@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import _ from "lodash";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { useProject } from "@refineit/app/project/hooks";
+import { useProject } from "@refineit/app/(project)/hooks";
 
 interface SearchBarProps {
     onValueChange?: (value: string) => void;

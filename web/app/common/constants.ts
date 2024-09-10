@@ -13,7 +13,11 @@ export const endpoints = {
         REPOSITORY_SEARCH: "/api/github/search-code/?{{query}}"
     },
     PROJECTS: {
-        GET_ALL: API_SERVER_HOST + "/api/projects/?{{query}}"
+        CREATE: API_SERVER_HOST + "/api/projects/new",
+        UPDATE: API_SERVER_HOST + "/api/projects/{{id}}",
+        DELETE: API_SERVER_HOST + "/api/projects/{{id}}",
+        GET_ALL: API_SERVER_HOST + "/api/projects/?{{query}}",
+        GET_BY_SLUG: API_SERVER_HOST + "/api/projects/{{slug}}",
     }
 }
 

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useRef } from 'react';
-import { Ripple } from 'primereact/ripple';
-import { StyleClass } from 'primereact/styleclass';
+import React, { useRef } from "react";
+import { Ripple } from "primereact/ripple";
+import { StyleClass } from "primereact/styleclass";
 
 interface MenuItem {
     label: string;

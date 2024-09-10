@@ -12,7 +12,7 @@ import SidebarMenu from "./MobileSidebar";
 import { Ripple } from "primereact/ripple";
 import { removeIcons } from "@refineit/utilities";
 
-const Navigation: React.FC = () => {
+const Navigation: React.FC<{searchEnabled?: boolean}> = ({searchEnabled=true}) => {
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const router = useRouter();
     const { data, status } = useSession();
@@ -62,12 +62,12 @@ const Navigation: React.FC = () => {
     return (
         <div className="card sticky top-0 z-5">
             <div className="hidden lg:block">
-                <Menubar model={removeIcons(items.current)} start={Logo} end={UserControls}
+                <Menubar model={removeIcons(items.current)} start={Logo} end={UserControls.bind(null, {searchEnabled})}
                     className="shadow-2 border-noround surface-overlay px-4 shadow-2 flex align-items-center justify-content-between relative lg:static" />
             </div>
             <div className="lg:hidden flex justify-content-between px-4 surface-100 shadow-2 py-2">
                 <Button icon="pi pi-bars" ref={sidebarIcon} onClick={() => setSidebarVisible(true)} className="p-button-text text-black-alpha-90 sidebar-toggle-btn" />
-                <UserControls />
+                <UserControls searchEnabled={searchEnabled} />
                 <Sidebar header={<Logo />} visible={sidebarVisible} onHide={() => setSidebarVisible(false)}>
                     <div className="flex flex-column h-full">
                         <ul className="list-none p-0 m-0">

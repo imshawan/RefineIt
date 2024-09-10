@@ -13,7 +13,7 @@ import { InputIcon } from "primereact/inputicon";
 import { useBreakpoints } from "@refineit/hooks";
 import { http, parseParams } from "@refineit/utilities";
 import { endpoints, externals } from "@refineit/common/constants";
-import { INodeItem, IGitHubFileContent, ISearchResult, IRepositoryTreeNode } from "@refineit/types";
+import { INodeItem, IGitHubFileContent, ISearchResult, IRepositoryTreeNode, IBlobContent } from "@refineit/types";
 
 interface IRepositoryContentSelectorProps {
     show: boolean;
@@ -31,6 +31,7 @@ export const RepositoryContentSelector: React.FC<IRepositoryContentSelectorProps
     const [loadingNodes, setLoadingNodes] = useState<string[]>([]);
     const [searching, setSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [fileInfoLoading, setFileInfoLoading] = useState(false);
 
     const inputText = useRef<HTMLInputElement>(null);
 
@@ -52,9 +53,21 @@ export const RepositoryContentSelector: React.FC<IRepositoryContentSelectorProps
         return null;
     };
 
-    const onSelectionSubmit = () => {
+    const onSelectionSubmit = async () => {
         if (onSelectionComplete && typeof onSelectionComplete === "function") {
             const content = findNodeByKey(repositoryContent as IRepositoryTreeNode[], String(selectedFiles));
+            if (!content?.type && content?.text_matches && content.text_matches.length) {
+                let match = content.text_matches[0];
+                if (match.object_type == "FileContent") {
+                    setFileInfoLoading(true);
+
+                    let info = await http.get<IBlobContent>(content.git_url, {}, true);
+                    content.type = "file";
+                    content.size = info?.size || 0;
+                    
+                    setFileInfoLoading(false);
+                }
+            }
             if (content?.type !== "file") {
                 return toast.error("Error", {description: "Please select a single file"});
             }
@@ -105,7 +118,9 @@ export const RepositoryContentSelector: React.FC<IRepositoryContentSelectorProps
                 const repoUrlParts = repositoryUrl.split("/");
                 const owner = repoUrlParts[repoUrlParts.length - 2];
                 const repo = repoUrlParts[repoUrlParts.length - 1];
-                const response = await http.get<IGitHubFileContent[]>(parseParams(externals.github.REPOSITORY_CONTENT, {owner, repo, name: node.key}));
+                const response = await http.get<IGitHubFileContent[]>(
+                    parseParams(externals.github.REPOSITORY_CONTENT, {owner, repo, name: node.key}), {}, true
+                );
 
                 node.children = response.map((item: IGitHubFileContent) => ({
                     key: item.path,
@@ -167,7 +182,7 @@ export const RepositoryContentSelector: React.FC<IRepositoryContentSelectorProps
         return (
             <div>
                 <Button label="Cancel" onClick={onHide} icon="pi pi-times" className="p-button-text p-button-sm" />
-                <Button label="Save" onClick={onSelectionSubmit} icon="pi pi-check" autoFocus className="p-button-sm" />
+                <Button label="Save" onClick={onSelectionSubmit} loading={fileInfoLoading} icon="pi pi-check" autoFocus className="p-button-sm" />
             </div>
         )
     }

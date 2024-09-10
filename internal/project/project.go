@@ -1,6 +1,7 @@
 package project
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -8,12 +9,13 @@ import (
 
 	"github.com/imshawan/RefineIt/helpers"
 	"github.com/imshawan/RefineIt/infra/database"
+	"github.com/imshawan/RefineIt/internal/user"
 	"github.com/imshawan/RefineIt/models"
 	"github.com/lib/pq"
 )
 
 var ProjectFields = []string{
-	"id", "name", "slug", "description", "review_type", "repository_url", "filename", "file_url", "visibility", "owner_id",
+	"id", "name", "slug", "description", "about", "review_type", "repository_url", "filename", "file_url", "visibility", "owner_id",
 	"tags", "reviews_count", "stars_count", "last_reviewed_at", "is_featured", "contributors_count",
 	"priority", "created_at", "updated_at",
 }
@@ -23,7 +25,11 @@ func CreateProject(project models.Project) (models.Project, error) {
 	if project.OwnerID == "" {
 		return project, errors.New("owner_id is required")
 	}
-	
+
+	if project.About == "" {
+		project.About = "This project is about " + project.Name
+	}
+
 	if project.Tags == nil || len(project.Tags) == 0 {
 		project.Tags = []string{}
 	}
@@ -69,15 +75,22 @@ func CreateProject(project models.Project) (models.Project, error) {
 	project.CreatedAt = now
 	project.UpdatedAt = now
 
+	var ownerFields []string
+	for _, field := range user.PublicFields {
+		ownerFields = append(ownerFields, fmt.Sprintf("'%s', users.%s", field, field))
+	}
+
 	projectFields := strings.Join(ProjectFields, ", ")
+
+	// Construct the SQL query with the returning clause
 
 	count := len(ProjectFields)
 	query := fmt.Sprintf("INSERT INTO projects (%s) VALUES (%s) RETURNING %s", projectFields, database.GeneratePlaceholders(count, "$%d"), projectFields)
 
-	errs := database.Client.QueryRow(query, project.ID, project.Name, project.Slug, project.Description, project.ReviewType, project.RepositoryURL, project.Filename, project.FileUrl,
+	errs := database.Client.QueryRow(query, project.ID, project.Name, project.Slug, project.Description, project.About, project.ReviewType, project.RepositoryURL, project.Filename, project.FileUrl,
 		project.Visibility, project.OwnerID, pq.Array(project.Tags), project.ReviewsCount, project.StarsCount,
 		project.LastReviewedAt, project.IsFeatured, project.ContributorsCount,
-		project.Priority, project.CreatedAt, project.UpdatedAt).Scan(&project.ID, &project.Name, &project.Slug, &project.Description, &project.ReviewType, &project.RepositoryURL, &project.Filename, &project.FileUrl,
+		project.Priority, project.CreatedAt, project.UpdatedAt).Scan(&project.ID, &project.Name, &project.Slug, &project.Description, &project.About, &project.ReviewType, &project.RepositoryURL, &project.Filename, &project.FileUrl,
 		&project.Visibility, &project.OwnerID, pq.Array(&project.Tags), &project.ReviewsCount, &project.StarsCount,
 		&project.LastReviewedAt, &project.IsFeatured, &project.ContributorsCount,
 		&project.Priority, &project.CreatedAt, &project.UpdatedAt)
@@ -90,6 +103,22 @@ func CreateProject(project models.Project) (models.Project, error) {
 		fmt.Println(errs)
 		// Handle other errors
 		return project, fmt.Errorf("error inserting project into the database")
+	}
+
+	var owner json.RawMessage
+	ownerQuery := fmt.Sprintf("SELECT  jsonb_build_object(%s) AS owner FROM users WHERE users.id = $1", strings.Join(ownerFields, ", "))
+	err = database.Client.QueryRow(ownerQuery, project.OwnerID).Scan(&owner)
+	if err != nil {
+		return project, err
+	}
+
+	// Unmarshal the JSON data (owner) into map[string]interface{}
+	var ownerMap map[string]interface{}
+	err = json.Unmarshal(owner, &ownerMap)
+	if err != nil {
+		fmt.Printf("error unmarshalling owner JSON: %v", err)
+	} else {
+		project.Owner = ownerMap
 	}
 
 	return project, nil

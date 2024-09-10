@@ -23,7 +23,6 @@ export interface IProject {
 
 interface IProjectOwner {
     username: ReactNode;
-    email: string;
     fullname: string;
     profile_picture: string;
 }
