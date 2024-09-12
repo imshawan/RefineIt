@@ -1,13 +1,13 @@
 import React from "react";
-import { Badge } from "primereact/badge";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
-import { ProgressBar } from "primereact/progressbar";
 import { Avatar } from "primereact/avatar";
 import moment from "moment";
 import { Button } from "primereact/button";
+import { AboutSection } from "@refineit/components/project";
 
 const Overview: React.FC<{ project: any }> = ({ project }) => {
+
     return (
         <div className="p-4">
             <div className="flex grid mx-0">
@@ -30,11 +30,7 @@ const Overview: React.FC<{ project: any }> = ({ project }) => {
                             </div>
                         </div>
                     </div>
-                    <h3>About {project.name}</h3>
-                    <p>
-                        {project.name} is a collaborative platform for developers to share and discover project reviews. It allows developers to leave detailed feedback on projects they&lsquo;ve used, including ratings, pros, cons, and overall impressions.
-                        The platform also features a discovery section where developers can browse and search for projects based on various criteria, such as programming language, framework, or specific features. This helps developers find new and interesting projects to explore and potentially use in their own work.
-                    </p>
+                    <AboutSection name={project.name} projectId={project.id} content={project.about} />
                 </div>
                 <div className="w-12 md:w-4 md:pl-4">
                     <Button label="Start a Review" className="p-button-contrast w-full mb-4" icon="pi pi-comment" />
@@ -59,26 +55,6 @@ const Overview: React.FC<{ project: any }> = ({ project }) => {
                 </div>
             </div>
             <div className="grid">
-                <div className="col-12 md:col-6">
-                    <Card title="Tech Stack" className="mb-4">
-                        <div className="flex flex-wrap gap-2">
-                            {["React", "TypeScript", "PrimeReact", "Go"].map(
-                                (tech, index) => (
-                                    <Badge
-                                        key={index}
-                                        value={tech}
-                                        size="large"
-                                        severity="info"
-                                    />
-                                ),
-                            )}
-                        </div>
-                    </Card>
-                    <Card title="Project Health" className="mb-4">
-                        <ProgressBar value={75} showValue={false} />
-                        <div className="mt-2">75% - Good condition</div>
-                    </Card>
-                </div>
                 <div className="col-12 md:col-6">
                     <Card title="Contribution Activity">
                         <Chart
@@ -105,6 +81,7 @@ const Overview: React.FC<{ project: any }> = ({ project }) => {
                         />
                     </Card>
                 </div>
+
             </div>
         </div>
     )

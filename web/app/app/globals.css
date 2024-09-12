@@ -25,7 +25,7 @@ body {
 .p-inputtext:enabled:focus,
 .p-multiselect:not(.p-disabled).p-focus,
 .p-dropdown:not(.p-disabled).p-focus,
-.p-button-contrast:focus, .p-button-outlined:focus {
+.p-button-contrast:focus, .p-button-outlined:focus, .p-button-text:focus {
     box-shadow:
         0 0 0 2px #ffffff,
         0 0 0 4px #7e7e7e,
@@ -39,7 +39,7 @@ body {
     border-color: rgb(107, 107, 107);
 }
 
-.p-button-tertiary:focus:not(.p-button-contrast) {
+.p-button-tertiary:focus:not(.p-button-contrast), .p-button-text {
     color: var(--text-color);
 }
 
