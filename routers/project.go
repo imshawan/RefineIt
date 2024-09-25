@@ -11,4 +11,5 @@ func RegisterProjectRoutes(router *gin.RouterGroup) {
 	router.GET("/", services.GetProjectsWithFilters)
 	router.GET("/:slug", services.GetProjectBySlug)
 	router.POST("/new", middlewares.IsAuthenticated(), middlewares.ValidateRequestFields(&models.ProjectCreationRequest{}), services.CreateProject)
+	router.PUT("/update/:id", middlewares.IsAuthenticated(), services.UpdateProjectInfo)
 }

@@ -6,8 +6,12 @@ import rehypeRaw from "rehype-raw";
 import SimpleMDE from "react-simplemde-editor";
 import EasyMDE from "easymde";
 import { Button } from "primereact/button";
+import { updateProject } from "@refineit/store/project";
 
 import "easymde/dist/easymde.min.css";
+import { useSession } from "next-auth/react";
+import { IUserTokenInfo, UserTokenStore } from "@refineit/lib";
+import { toast } from "sonner";
 
 interface IAboutSectionProps {
     content: string;
@@ -16,6 +20,7 @@ interface IAboutSectionProps {
 }
 
 export const AboutSection: React.FC<IAboutSectionProps> = ({ content, name, projectId }) => {
+    const { data: session } = useSession();
     const [isEditing, setIsEditing] = React.useState(false);
     const [markdown, setMarkdown] = React.useState<string>(content || "# Hello, Markdown!");
     const [editorData, setEditorData] = React.useState<string>(content || "# Hello, Markdown!");
@@ -35,7 +40,25 @@ export const AboutSection: React.FC<IAboutSectionProps> = ({ content, name, proj
     const handleSubmit = () => {
         setMarkdown(editorData);
         setIsEditing(false);
+
+        if (session && session.user) {
+            UserTokenStore.parseAndSetTokenInfo(session);
+
+            updateProject({
+                params: {id: projectId},
+                body: {about: editorData}
+            }).then(resp => {
+                if (typeof resp === "string") {
+                    return toast.error("Error", {description: resp})
+                } else if (resp.statusCode > 399) {
+                    return toast.error("Error while updating", {description: resp.status.message});
+                } else {
+                    return toast.success("Success", {description: resp.response.message});
+                }
+            });
+        }
     }
+    
 
     const editorOptions: EasyMDE.Options = React.useMemo(() => ({
         toolbar: [

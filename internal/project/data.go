@@ -1,6 +1,7 @@
 package project
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -238,7 +239,26 @@ func Includes(arr []string, str string) bool {
 	return false
 }
 
-func GetProjectBySlugWithOwner(slug string) (models.Project, error) {	
+func GetProjectBySlugWithOwner(slug string) (models.Project, error) {
+	var projectData models.Project
+	if slug == "" {
+		return projectData, fmt.Errorf("slug is required")
+	}
+
+	return GetProjectBy("slug", slug)
+}
+
+func GetProjectByIdWithOwner(id string) (models.Project, error) {
+	var projectData models.Project
+	if id == "" {
+		return projectData, fmt.Errorf("id is required")
+	}
+
+	return GetProjectBy("id", id)
+}
+
+func GetProjectBy(field string, value string) (models.Project, error) {
+	var projectData models.Project
 	var fields []string
 	for _, field := range ProjectFields {
 		fields = append(fields, "project."+field)
@@ -254,15 +274,18 @@ func GetProjectBySlugWithOwner(slug string) (models.Project, error) {
 	query := fmt.Sprintf(`
 		SELECT %s, 
 		jsonb_build_object(%s) AS owner FROM projects as project 
-		LEFT JOIN users ON project.owner_id = users.id WHERE project.slug = $1`, strings.Join(fields, ", "), ownerFieldList)
+		LEFT JOIN users ON project.owner_id = users.id WHERE project.%s = $1`, strings.Join(fields, ", "), ownerFieldList, field)
 
-	var projectData models.Project
-	var ownerRaw json.RawMessage 
-	err := database.Client.QueryRow(query, slug).Scan(&projectData.ID, &projectData.Name, &projectData.Slug, &projectData.Description, &projectData.About, &projectData.ReviewType, &projectData.RepositoryURL, &projectData.Filename, &projectData.FileUrl,
+	var ownerRaw json.RawMessage
+	err := database.Client.QueryRow(query, value).Scan(&projectData.ID, &projectData.Name, &projectData.Slug, &projectData.Description, &projectData.About, &projectData.ReviewType, &projectData.RepositoryURL, &projectData.Filename, &projectData.FileUrl,
 		&projectData.Visibility, &projectData.OwnerID, pq.Array(&projectData.Tags), &projectData.ReviewsCount, &projectData.StarsCount,
 		&projectData.LastReviewedAt, &projectData.IsFeatured, &projectData.ContributorsCount,
 		&projectData.Priority, &projectData.CreatedAt, &projectData.UpdatedAt, &ownerRaw)
 	if err != nil {
+		if err == sql.ErrNoRows {
+            // Handle the case where no rows were found
+            return projectData, fmt.Errorf("no project found with the given %s", field)
+        }
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
 			return projectData, fmt.Errorf("error occured while data retrival due to schema mismatch")
 		}

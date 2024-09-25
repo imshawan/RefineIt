@@ -106,7 +106,7 @@ func CreateProject(project models.Project) (models.Project, error) {
 	}
 
 	var owner json.RawMessage
-	ownerQuery := fmt.Sprintf("SELECT  jsonb_build_object(%s) AS owner FROM users WHERE users.id = $1", strings.Join(ownerFields, ", "))
+	ownerQuery := fmt.Sprintf("SELECT jsonb_build_object(%s) AS owner FROM users WHERE users.id = $1", strings.Join(ownerFields, ", "))
 	err = database.Client.QueryRow(ownerQuery, project.OwnerID).Scan(&owner)
 	if err != nil {
 		return project, err
@@ -122,4 +122,45 @@ func CreateProject(project models.Project) (models.Project, error) {
 	}
 
 	return project, nil
+}
+
+func UpdateProject(projectID string, projectData map[string]interface{}) error {
+	query := "UPDATE projects SET "
+	args := []interface{}{}
+	setParts := []string{}
+
+	// Build the query dynamically from projectData map
+	counter := 1
+	for key, value := range projectData {
+		setParts = append(setParts, fmt.Sprintf("%s = $%d", key, counter))
+		args = append(args, value)
+		counter++
+	}
+
+	if len(setParts) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	// Join the set parts (to avoid trailing comma) and add the WHERE clause
+	query += strings.Join(setParts, ", ") + fmt.Sprintf(" WHERE id = $%d", counter)
+	args = append(args, projectID)
+
+	_, err := database.Client.Exec(query, args...)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23505": // Unique violation
+				return errors.New("duplicate value: unique constraint violation")
+			case "23503": // Foreign key violation
+				return errors.New("invalid foreign key reference")
+			case "42703": // Undefined column
+				return fmt.Errorf("field does not exist: %s", pqErr.Column)
+			default:
+				return fmt.Errorf("database error: %s", pqErr.Message)
+			}
+		}
+		return fmt.Errorf("failed to execute query: %v", err)
+	}
+
+	return nil
 }

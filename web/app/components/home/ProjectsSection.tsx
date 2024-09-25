@@ -12,7 +12,7 @@ export const ProjectsSection: React.FC<{projects: any}> = ({projects}) => {
         <div className="w-12 md:w-5 lg:w-3 p-3">
             <Card>
                 <div className="px-3 mb-3 flex justify-content-between">
-                    <h3 className="m-0 my-auto">My Projects</h3>
+                    <h3 className="m-0 my-auto">Contributions</h3>
                     <Button
                         icon="pi pi-plus"
                         iconPos="right"

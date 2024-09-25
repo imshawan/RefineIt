@@ -37,6 +37,20 @@ type ProjectCreationRequest struct {
 	Priority      string            `json:"priority" binding:"required,oneof=low medium high"`
 }
 
+type ProjectUpdateRequest struct {
+	Name          *string            `json:"name,omitempty" binding:"omitempty,min=3,max=100"`
+	Slug          *string            `json:"slug,omitempty" binding:"omitempty,min=3,max=100"`
+	About         string             `json:"about" binding:"max=4500"`
+	Description   *string            `json:"description,omitempty" binding:"omitempty,min=3,max=2500"`
+	ReviewType    *string            `json:"review_type,omitempty"`
+	RepositoryURL *string            `json:"repository_url,omitempty"`
+	Filename      *string            `json:"filename,omitempty"`
+	FileUrl       *string            `json:"file_url,omitempty"`
+	Visibility    *ProjectVisibility `json:"visibility,omitempty"`
+	Tags          []string           `json:"tags,omitempty"`
+	Priority      *string            `json:"priority,omitempty" binding:"omitempty,oneof=low medium high"`
+}
+
 type Project struct {
 	ID                string                 `json:"id,omitempty"`
 	Name              string                 `json:"name" binding:"required,min=3,max=100"`

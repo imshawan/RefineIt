@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -121,4 +122,73 @@ func GetProjectBySlug(ctx *gin.Context) {
 	}
 
 	helpers.FormatAPIResponse(ctx, http.StatusOK, projectData)
+}
+
+func UpdateProjectInfo(ctx *gin.Context) {
+	id := ctx.Param("id")
+	user, _ := ctx.Get("User")
+
+	loggedInUser, ok := user.(models.User)
+	if !ok {
+		helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("failed to assert user type"))
+		return
+	}
+
+	if len(id) == 0 {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	exists, err := project.GetProjectByIdWithOwner(id)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	if loggedInUser.ID != exists.OwnerID {
+		helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("you are not allowed to perform this operation"))
+		return
+	}
+
+	var projectReq models.ProjectUpdateRequest
+	if err := ctx.ShouldBind(&projectReq); err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	projectData := make(map[string]interface{})
+
+	// Use reflection to iterate over the fields
+	_value := reflect.ValueOf(projectReq)
+	_type := _value.Type()
+
+	for i := 0; i < _value.NumField(); i++ {
+		fieldValue := _value.Field(i)
+		fieldType := _type.Field(i)
+
+		// Check if the field is a pointer and not nil
+		if fieldValue.Kind() == reflect.Ptr && !fieldValue.IsNil() {
+			projectData[fieldType.Name] = fieldValue.Elem().Interface() // Dereference the pointer
+		} else if fieldValue.Kind() != reflect.Ptr && fieldValue.IsValid() && !helpers.IsZero(fieldValue) {
+			projectData[fieldType.Name] = fieldValue.Interface()
+		}
+	}
+
+	if len(projectData) == 0 {
+		helpers.FormatAPIResponse(ctx, http.StatusOK, nil)
+		return
+	}
+
+	_err := project.UpdateProject(id, projectData); if _err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, _err)
+		return
+	}
+
+	updatedProject, err := project.GetProjectByIdWithOwner(id)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusOK, gin.H{"message": "Project updated successfully", "project": updatedProject})
 }

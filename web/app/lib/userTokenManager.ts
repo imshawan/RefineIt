@@ -1,3 +1,5 @@
+import { Session } from "next-auth";
+
 export interface IUserTokenInfo {
     name: string;
     email: string;
@@ -14,6 +16,13 @@ export class UserTokenStore {
 
     public static setTokenInfo(tokenInfo: IUserTokenInfo): void {
         UserTokenStore.userTokenInfo = tokenInfo;
+    }
+
+    public static parseAndSetTokenInfo(session: Session): void {
+        if (session && session.user) {
+            let user = session.user as IUserTokenInfo;
+            UserTokenStore.setTokenInfo(user);
+        }
     }
 
     public static getTokenInfo(): IUserTokenInfo | null {

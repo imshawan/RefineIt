@@ -22,6 +22,7 @@ body {
 
 .button-dark:focus,
 .p-button-outlined:hover,
+.p-button-tertiary:focus,
 .p-inputtext:enabled:focus,
 .p-multiselect:not(.p-disabled).p-focus,
 .p-dropdown:not(.p-disabled).p-focus,

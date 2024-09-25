@@ -1,6 +1,6 @@
 import { http, parseParams } from "@refineit/utilities";
 import { endpoints } from "@refineit/common";
-import {ApiResponse} from "@refineit/types";
+import {ApiResponse, IProject} from "@refineit/types";
 import { UserTokenStore } from "@refineit/lib";
 
 export interface IProjectFetchPayload {
@@ -38,6 +38,14 @@ export const getProjectBySlug = async (payload: {slug: string}) => {
 export const createProject = async (payload: any) => {
     try {
         return await http.post<ApiResponse.IBaseResponse>(endpoints.PROJECTS.CREATE, payload);
+    } catch (err: any) {
+        return http.parseHttpError(err);
+    }
+}
+
+export const updateProject = async (payload: {params: object, body: object}) => {
+    try {
+        return await http.put<ApiResponse.IBaseResponse>(parseParams(endpoints.PROJECTS.UPDATE, payload.params), payload.body);
     } catch (err: any) {
         return http.parseHttpError(err);
     }

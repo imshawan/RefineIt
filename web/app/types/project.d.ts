@@ -2,6 +2,7 @@ export interface IProject {
     id: string;
     contributors_count: number;
     created_at: string;
+    about: string;
     description: string;
     file_url: string;
     filename: string;

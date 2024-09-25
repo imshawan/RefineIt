@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"net/mail"
+	"reflect"
 	"regexp"
 	"strings"
 	"time"
@@ -14,6 +15,12 @@ func IsEmail(str string) bool {
 	_, err := mail.ParseAddress(str)
 	return err == nil
 }
+
+func IsZero(v reflect.Value) bool {
+    zero := reflect.Zero(v.Type()).Interface()
+    return reflect.DeepEqual(v.Interface(), zero)
+}
+
 
 func GenerateUUID() (string, error) {
 	uuidV6, err := uuid.NewV6()

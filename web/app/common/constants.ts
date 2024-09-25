@@ -14,7 +14,7 @@ export const endpoints = {
     },
     PROJECTS: {
         CREATE: API_SERVER_HOST + "/api/projects/new",
-        UPDATE: API_SERVER_HOST + "/api/projects/{{id}}",
+        UPDATE: API_SERVER_HOST + "/api/projects/update/{{id}}",
         DELETE: API_SERVER_HOST + "/api/projects/{{id}}",
         GET_ALL: API_SERVER_HOST + "/api/projects/?{{query}}",
         GET_BY_SLUG: API_SERVER_HOST + "/api/projects/{{slug}}",
