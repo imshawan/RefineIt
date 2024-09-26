@@ -6,10 +6,14 @@ import { handleStar } from "@refineit/store/project";
 import { useSession } from "next-auth/react";
 import { UserTokenStore } from "@refineit/lib";
 import { toast } from "sonner";
+import { formatNumberWithMetricPrefix } from "@refineit/utilities";
 
 export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
     const { data: session } = useSession();
     const [starred, setStarred] = React.useState(project.self_starred);
+    const [stars, setStars] = React.useState(Number(project.stars_count) || 0);
+
+    const starsCount = React.useMemo(() => formatNumberWithMetricPrefix(stars), [stars]);
 
     const handleStarOnClick = async () => {
         if (!session) return; // TODO: Added login Pop-up
@@ -30,6 +34,7 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
         } else {
             toast.success("Success", {description: resp.response.message});
             setStarred(!starred);
+            setStars(prev => starred ? prev - 1 : prev + 1)
         }
     };
     const handleReview = () => {
@@ -45,7 +50,7 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
                 <div className="w-12 lg:w-6 mb-3 lg:pr-2">
                     <div style={{ borderRadius: "0.5rem", cursor: "pointer" }} className="p-button-tertiary flex flex-column p-3 align-items-center ">
                         <i className="pi pi-star font-medium text-3xl mb-1"></i>
-                        <div className="text-3xl font-semibold mb-1">12.5k</div>
+                        <div className="text-3xl font-semibold mb-1">{starsCount}</div>
                         <div className="text-muted font-light">Stars</div>
                     </div>
                 </div>
