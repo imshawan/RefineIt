@@ -19,6 +19,7 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
         if (!session) return; // TODO: Added login Pop-up
 
         UserTokenStore.parseAndSetTokenInfo(session);
+        setStars(prev => starred ? prev - 1 : prev + 1)
 
         let resp = await handleStar({
             id: project.id,
@@ -34,7 +35,6 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
         } else {
             toast.success("Success", {description: resp.response.message});
             setStarred(!starred);
-            setStars(prev => starred ? prev - 1 : prev + 1)
         }
     };
     const handleReview = () => {

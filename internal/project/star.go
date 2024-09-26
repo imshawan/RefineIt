@@ -39,6 +39,8 @@ func Star(projectID string, userID string) error {
 		return fmt.Errorf("error starring project: %v", err)
 	}
 
+	database.IncrementFieldCount("projects", "stars_count", projectID, 1)
+
 	return nil
 }
 
@@ -62,6 +64,8 @@ func UnStar(projectID string, userID string) error {
 		}
 		return fmt.Errorf("error unstarring project: %v", err)
 	}
+
+	database.DecrementFieldCount("projects", "stars_count", projectID, 1)
 
 	return nil
 }
