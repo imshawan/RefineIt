@@ -8,8 +8,10 @@ import (
 )
 
 func RegisterProjectRoutes(router *gin.RouterGroup) {
-	router.GET("/", services.GetProjectsWithFilters)
-	router.GET("/:slug", services.GetProjectBySlug)
+	router.GET("/",middlewares.CheckIfAuthenticated(), services.GetProjectsWithFilters)
+	router.GET("/:slug", middlewares.CheckIfAuthenticated(), services.GetProjectBySlug)
 	router.POST("/new", middlewares.IsAuthenticated(), middlewares.ValidateRequestFields(&models.ProjectCreationRequest{}), services.CreateProject)
 	router.PUT("/update/:id", middlewares.IsAuthenticated(), services.UpdateProjectInfo)
+	router.POST("/star/:id", middlewares.IsAuthenticated(), services.StarProject)
+	router.POST("/unstar/:id", middlewares.IsAuthenticated(), services.UnStarProject)
 }

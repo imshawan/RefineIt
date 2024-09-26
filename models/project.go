@@ -66,7 +66,8 @@ type Project struct {
 	Owner             map[string]interface{} `json:"owner"`                                             // ID of the user who owns the project
 	Tags              []string               `json:"tags"`                                              // List of tags related to the project
 	ReviewsCount      *int                   `json:"reviews_count"`                                     // Number of reviews the project has received
-	StarsCount        *int                   `json:"stars_count"`                                       // Number of stars or likes the project has received
+	StarsCount        *int                   `json:"stars_count"`
+	SelfStarred       *bool                  `json:"self_starred"`                                      // Whether the current user has starred the project                                       // Number of stars or likes the project has received
 	LastReviewedAt    *time.Time             `json:"last_reviewed_at"`                                  // Timestamp of the last review
 	IsFeatured        *bool                  `json:"is_featured"`                                       // Whether the project is featured or not
 	ContributorsCount *int64                 `json:"contributors_count"`                                // Number of contributors

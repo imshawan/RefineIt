@@ -21,6 +21,7 @@ type GetProjectsOptions struct {
 	Fields        []string
 	PopulateOwner bool
 	OwnerFields   []string
+	UserID        string
 }
 
 // Default values for parameters
@@ -44,6 +45,7 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 		Fields:        ProjectFields,
 		PopulateOwner: DefaultPopulateOwner,
 		OwnerFields:   user.PublicFields,
+		UserID:        "",
 	}
 
 	// Apply functional options
@@ -65,6 +67,13 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 	// Prepare query to get the documents
 	query := fmt.Sprintf(`SELECT %s, jsonb_build_object() AS owner FROM projects as project `, fieldList)
 
+	if options.UserID != "" {
+		query = fmt.Sprintf(`SELECT %s, jsonb_build_object() AS owner,
+		 CASE WHEN stars.user_id IS NOT NULL THEN true ELSE false END AS self_starred
+		 FROM projects as project
+		 LEFT JOIN stars ON project.id = stars.project_id AND stars.user_id = $2`, fieldList)
+	}
+
 	if options.PopulateOwner {
 		var ownerFields []string
 		for _, field := range options.OwnerFields {
@@ -73,6 +82,16 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 
 		ownerFieldList := strings.Join(ownerFields, ", ")
 		query = fmt.Sprintf(`SELECT %s, jsonb_build_object(%s) AS owner FROM projects as project LEFT JOIN users ON project.owner_id = users.id `, fieldList, ownerFieldList)
+
+		if options.UserID != "" {
+			query = fmt.Sprintf(
+				`SELECT %s, jsonb_build_object(%s) AS owner,
+				 CASE WHEN stars.user_id IS NOT NULL THEN true ELSE false END AS self_starred
+				 FROM projects as project 
+				 LEFT JOIN users ON project.owner_id = users.id
+				 LEFT JOIN stars ON project.id = stars.project_id AND stars.user_id = $2`,
+				 fieldList, ownerFieldList)
+		}
 	}
 
 	query += " WHERE (project.name ILIKE $1 OR project.slug ILIKE $1 OR project.description ILIKE $1) "
@@ -113,7 +132,7 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 	}
 
 	// Execute the query
-	rows, err := database.Client.Query(query, "%"+options.Search+"%")
+	rows, err := database.Client.Query(query, "%"+options.Search+"%", options.UserID)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
 			return nil, 0, fmt.Errorf("error occured while data retrival due to schema mismatch")
@@ -142,11 +161,11 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 		for i, colType := range columnTypes {
 			switch colType.DatabaseTypeName() {
 			case "TEXT[]", "_TEXT":
-				columnsData[i] = new(pq.StringArray) // Handle TEXT[] as pq.StringArray
-			case "JSONB", "JSON": // Handle JSON/JSONB
-				columnsData[i] = new([]byte) // Use []byte to read JSON
+				columnsData[i] = new(pq.StringArray) // Handling TEXT[] as pq.StringArray
+			case "JSONB", "JSON": // Handling JSON/JSONB
+				columnsData[i] = new([]byte) // Using []byte to read JSON
 			default:
-				columnsData[i] = new(interface{}) // Handle other types
+				columnsData[i] = new(interface{}) // Handling any other types
 			}
 			columnsDataPointers[i] = columnsData[i]
 		}
@@ -229,6 +248,13 @@ func WithOwnerFields(fields []string) func(*GetProjectsOptions) {
 	}
 }
 
+// WithStarredByUser sets the user ID to get if projects are starred by the user
+func WithStarredByUser(userID string) func(*GetProjectsOptions) {
+	return func(opts *GetProjectsOptions) {
+		opts.UserID = userID
+	}
+}
+
 // Includes checks if a string is present in an array
 func Includes(arr []string, str string) bool {
 	for _, v := range arr {
@@ -239,25 +265,25 @@ func Includes(arr []string, str string) bool {
 	return false
 }
 
-func GetProjectBySlugWithOwner(slug string) (models.Project, error) {
+func GetProjectBySlugWithOwner(slug string, caller string) (models.Project, error) {
 	var projectData models.Project
 	if slug == "" {
 		return projectData, fmt.Errorf("slug is required")
 	}
 
-	return GetProjectBy("slug", slug)
+	return GetProjectBy("slug", slug, caller)
 }
 
-func GetProjectByIdWithOwner(id string) (models.Project, error) {
+func GetProjectByIdWithOwner(id string, caller string) (models.Project, error) {
 	var projectData models.Project
 	if id == "" {
 		return projectData, fmt.Errorf("id is required")
 	}
 
-	return GetProjectBy("id", id)
+	return GetProjectBy("id", id, caller)
 }
 
-func GetProjectBy(field string, value string) (models.Project, error) {
+func GetProjectBy(field string, value string, caller string) (models.Project, error) {
 	var projectData models.Project
 	var fields []string
 	for _, field := range ProjectFields {
@@ -273,19 +299,23 @@ func GetProjectBy(field string, value string) (models.Project, error) {
 
 	query := fmt.Sprintf(`
 		SELECT %s, 
-		jsonb_build_object(%s) AS owner FROM projects as project 
+		jsonb_build_object(%s) AS owner,
+		CASE WHEN stars.user_id IS NOT NULL THEN true ELSE false END AS self_starred 
+		FROM projects as project 
+		LEFT JOIN stars ON project.id = stars.project_id AND stars.user_id = $2
 		LEFT JOIN users ON project.owner_id = users.id WHERE project.%s = $1`, strings.Join(fields, ", "), ownerFieldList, field)
 
 	var ownerRaw json.RawMessage
-	err := database.Client.QueryRow(query, value).Scan(&projectData.ID, &projectData.Name, &projectData.Slug, &projectData.Description, &projectData.About, &projectData.ReviewType, &projectData.RepositoryURL, &projectData.Filename, &projectData.FileUrl,
+	var selfStarred bool
+	err := database.Client.QueryRow(query, value, caller).Scan(&projectData.ID, &projectData.Name, &projectData.Slug, &projectData.Description, &projectData.About, &projectData.ReviewType, &projectData.RepositoryURL, &projectData.Filename, &projectData.FileUrl,
 		&projectData.Visibility, &projectData.OwnerID, pq.Array(&projectData.Tags), &projectData.ReviewsCount, &projectData.StarsCount,
 		&projectData.LastReviewedAt, &projectData.IsFeatured, &projectData.ContributorsCount,
-		&projectData.Priority, &projectData.CreatedAt, &projectData.UpdatedAt, &ownerRaw)
+		&projectData.Priority, &projectData.CreatedAt, &projectData.UpdatedAt, &ownerRaw, &selfStarred)
 	if err != nil {
 		if err == sql.ErrNoRows {
-            // Handle the case where no rows were found
-            return projectData, fmt.Errorf("no project found with the given %s", field)
-        }
+			// Handle the case where no rows were found
+			return projectData, fmt.Errorf("no project found with the given %s", field)
+		}
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
 			return projectData, fmt.Errorf("error occured while data retrival due to schema mismatch")
 		}
@@ -299,6 +329,7 @@ func GetProjectBy(field string, value string) (models.Project, error) {
 	}
 
 	projectData.Owner = ownerMap
+	projectData.SelfStarred = &selfStarred
 
 	return projectData, nil
 }

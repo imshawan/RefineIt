@@ -18,6 +18,8 @@ export const endpoints = {
         DELETE: API_SERVER_HOST + "/api/projects/{{id}}",
         GET_ALL: API_SERVER_HOST + "/api/projects/?{{query}}",
         GET_BY_SLUG: API_SERVER_HOST + "/api/projects/{{slug}}",
+        STAR: API_SERVER_HOST + "/api/projects/star/{{id}}",
+        UN_STAR: API_SERVER_HOST + "/api/projects/unstar/{{id}}",
     }
 }
 

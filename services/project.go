@@ -51,6 +51,8 @@ func CreateProject(ctx *gin.Context) {
 }
 
 func GetProjectsWithFilters(ctx *gin.Context) {
+	user, _ := ctx.Get("User")
+	
 	var options []func(*project.GetProjectsOptions)
 
 	Page := 1
@@ -59,6 +61,10 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 	ownerFields := []string{"fullname", "username", "profile_picture"}
 
 	options = append(options, project.WithOwner(true), project.WithOwnerFields(ownerFields))
+	userData, ok := user.(models.User)
+	if ok {
+		options = append(options, project.WithStarredByUser(userData.ID))
+	}
 
 	page, exists := ctx.GetQuery("page")
 	if exists {
@@ -108,14 +114,22 @@ func GetProjectsWithFilters(ctx *gin.Context) {
 }
 
 func GetProjectBySlug(ctx *gin.Context) {
+	user, _ := ctx.Get("User")
 	slug := ctx.Param("slug")
+
+	var userID = ""
 
 	if len(slug) == 0 {
 		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("slug is required"))
 		return
 	}
 
-	projectData, err := project.GetProjectBySlugWithOwner(slug)
+	userData, ok := user.(models.User)
+	if ok {
+		userID = userData.ID
+	}
+
+	projectData, err := project.GetProjectBySlugWithOwner(slug, userID)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
 		return
@@ -139,7 +153,7 @@ func UpdateProjectInfo(ctx *gin.Context) {
 		return
 	}
 
-	exists, err := project.GetProjectByIdWithOwner(id)
+	exists, err := project.GetProjectByIdWithOwner(id, loggedInUser.ID)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
 		return
@@ -179,16 +193,77 @@ func UpdateProjectInfo(ctx *gin.Context) {
 		return
 	}
 
-	_err := project.UpdateProject(id, projectData); if _err != nil {
+	_err := project.UpdateProject(id, projectData)
+	if _err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, _err)
 		return
 	}
 
-	updatedProject, err := project.GetProjectByIdWithOwner(id)
+	updatedProject, err := project.GetProjectByIdWithOwner(id, loggedInUser.ID)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	helpers.FormatAPIResponse(ctx, http.StatusOK, gin.H{"message": "Project updated successfully", "project": updatedProject})
+}
+
+func StarProject(ctx *gin.Context) {
+	id := ctx.Param("id")
+	user, _ := ctx.Get("User")
+
+	loggedInUser, ok := user.(models.User)
+	if !ok {
+		helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("failed to assert user type"))
+		return
+	}
+
+	if len(id) == 0 {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	_, err := project.GetProjectByIdWithOwner(id, loggedInUser.ID)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	err = project.Star(id, loggedInUser.ID)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusOK, gin.H{"message": "Project added to starred"})
+}
+
+func UnStarProject(ctx *gin.Context) {
+	id := ctx.Param("id")
+	user, _ := ctx.Get("User")
+
+	loggedInUser, ok := user.(models.User)
+	if !ok {
+		helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("failed to assert user type"))
+		return
+	}
+
+	if len(id) == 0 {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	_, err := project.GetProjectByIdWithOwner(id, loggedInUser.ID)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	err = project.UnStar(id, loggedInUser.ID)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusOK, gin.H{"message": "Project removed from starred collection"})
 }

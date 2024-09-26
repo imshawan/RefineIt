@@ -50,3 +50,14 @@ export const updateProject = async (payload: {params: object, body: object}) => 
         return http.parseHttpError(err);
     }
 }
+
+export const handleStar = async (payload: {id: string, action: "STAR" | "UNSTAR"}) => {
+    let urls = {STAR: endpoints.PROJECTS.STAR, UNSTAR: endpoints.PROJECTS.UN_STAR}
+    let action = String(payload.action).toUpperCase() as keyof typeof urls;
+
+    try {
+        return await http.post<ApiResponse.IBaseResponse>(parseParams(urls[action], payload), {});
+    } catch (err: any) {
+        return http.parseHttpError(err);
+    }
+}

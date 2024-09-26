@@ -3,8 +3,7 @@ import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { Avatar } from "primereact/avatar";
 import moment from "moment";
-import { Button } from "primereact/button";
-import { AboutSection } from "@refineit/components/project";
+import { AboutSection, OverviewActions } from "@refineit/components/project";
 
 const Overview: React.FC<{ project: any }> = ({ project }) => {
 
@@ -32,27 +31,7 @@ const Overview: React.FC<{ project: any }> = ({ project }) => {
                     </div>
                     <AboutSection name={project.name} projectId={project.id} content={project.about} />
                 </div>
-                <div className="w-12 md:w-4 md:pl-4">
-                    <Button label="Start a Review" className="p-button-contrast w-full mb-4" icon="pi pi-comment" />
-                    <Button label="Star Project" className="mb-4 w-full p-button-tertiary" icon="pi pi-star" />
-                    <Button label="Project Settings" className="mb-4 w-full p-button-outlined" icon="pi pi-cog" />
-                    <div className="flex grid mx-0 justify-content-between">
-                        <div className="w-12 lg:w-6 mb-3 lg:pr-2">
-                            <div style={{ borderRadius: "0.5rem", cursor: "pointer" }} className="p-button-tertiary flex flex-column p-3 align-items-center ">
-                                <i className="pi pi-star font-medium text-3xl mb-1"></i>
-                                <div className="text-3xl font-semibold mb-1">12.5k</div>
-                                <div className="text-muted font-light">Stars</div>
-                            </div>
-                        </div>
-                        <div className="w-12 lg:w-6 mb-3 lg:pl-2">
-                            <div style={{ borderRadius: "0.5rem", cursor: "pointer" }} className="p-button-tertiary flex flex-column p-3 align-items-center">
-                                <i className="pi pi-comment font-medium text-3xl mb-1"></i>
-                                <div className="text-3xl font-semibold mb-1">142</div>
-                                <div className="text-muted font-light">Reviews</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <OverviewActions project={project} />
             </div>
             <div className="grid">
                 <div className="col-12 md:col-6">
