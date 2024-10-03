@@ -21,6 +21,7 @@ import { RegisterFormSchema } from "@refineit/lib/definitions";
 import { checkUsernameAvailibility, registerUser } from "@refineit/store/authentication";
 import { http, sleep } from "@refineit/utilities";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 const useStyles = tss.create(() => ({
     link: {
@@ -189,7 +190,7 @@ export default function RegisterationForm() {
                             />
                         )}
                     />
-                    <label htmlFor="agreeTerms">I agree to the <a href="#" className="text-primary">Terms & Conditions</a></label>
+                    <label htmlFor="agreeTerms">I agree to the <Link href="#" className="text-primary">Terms & Conditions</Link></label>
                 </div>
                 <FormFieldError className="mb-4" errors={errors} field="agreeTerms" />
                 <button className="mb-2 p-button-contrast p-button p-component" onClick={handleSubmit(onSubmit)} disabled={loading || signingIn}>

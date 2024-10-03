@@ -7,6 +7,7 @@ import { tss } from "tss-react";
 import { Badge } from "primereact/badge";
 import { BadgeSeverityType, IProject } from "@refineit/types";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ActionMenu } from "../common";
 import OwnerInfo from "./OwnerInfo";
 
@@ -137,16 +138,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <div className={classes.body}>
                 <div className="">
                     <h4 className={classes.title}>
-                        <a href={link}>{project.owner.username}/{project.slug}</a>
+                        <Link href={link}>{project.owner.username}/{project.slug}</Link>
                     </h4>
                 </div>
                 <p className={classes.description}>{project.description}</p>
 
                 <div className={classes.infoGrid}>
-                    <a href={project.file_url} target="_blank" className={classes.infoItem}>
+                    <Link href={project.file_url} target="_blank" className={classes.infoItem}>
                         <i className={`${classes.icon} pi pi-file`} />
                         {project.filename}
-                    </a>
+                    </Link>
                     <div className={classes.infoItem}>
                         <i className={`${classes.icon} pi pi-code`} />
                         Languages: {project.priority}

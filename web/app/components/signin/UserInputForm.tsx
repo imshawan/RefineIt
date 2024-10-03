@@ -17,6 +17,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { SigninFormSchema } from "@refineit/lib/definitions";
 
@@ -122,7 +123,7 @@ export default function UserInputForm() {
                         <label htmlFor="rememberme">Remember me</label>
                     </div>
                     <div className="text-center">
-                        <a href="#" className={"hover:text-green-600 " + classes.link}>Forgot password?</a>
+                        <Link href="#" className={"hover:text-green-600 " + classes.link}>Forgot password?</Link>
                     </div>
                 </div>
                 <button className="mb-2 p-button-contrast p-button p-component" onClick={handleSubmit(onSubmit)} disabled={loading}>

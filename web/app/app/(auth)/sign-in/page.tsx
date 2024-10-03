@@ -1,6 +1,7 @@
 import React from "react";
 import UserInputForm from "@refineit/components/signin/UserInputForm";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getNextServerSession } from "@refineit/lib/auth";
 
 const SignIn: React.FC = async () => {
@@ -54,10 +55,10 @@ const SignIn: React.FC = async () => {
                     <UserInputForm />
                     <div className="text-center">
                         <span>Don&lsquo;t have an account? </span>
-                        <a href="/register" className="font-medium hover:text-green-600" style={{
+                        <Link href="/register" className="font-medium hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Register</a>
+                        }}>Register</Link>
                     </div>
                 </div>
                 <div className="flex justify-content-between px-4 sm:px-8 md:px-5 lg:px-4 xl:px-8">
@@ -65,15 +66,15 @@ const SignIn: React.FC = async () => {
                         <span>&copy;</span> 2024 Refine.It. All rights reserved
                     </div>
                     <div className="font-semibold text-xs text-center">
-                        <a href="#" className="hover:text-green-600" style={{
+                        <Link href="#" className="hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Privacy Policy</a>
+                        }}>Privacy Policy</Link>
                         <span className="mx-2">•</span>
-                        <a href="#" className="hover:text-green-600" style={{
+                        <Link href="#" className="hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Terms & Conditions</a>
+                        }}>Terms & Conditions</Link>
                     </div>
                 </div>
             </div>

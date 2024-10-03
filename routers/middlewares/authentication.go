@@ -62,8 +62,8 @@ func CheckIfAuthenticated() gin.HandlerFunc {
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 		claims, err := authentication.ValidateJWTToken(token)
 		if err != nil {
-			helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, err)
-			ctx.Abort()
+			ctx.Set("User", nil)
+			ctx.Next()
 			return
 		}
 

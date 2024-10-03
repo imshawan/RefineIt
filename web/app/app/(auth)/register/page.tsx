@@ -1,6 +1,7 @@
 import React from "react";
 import RegisterationForm from "@refineit/components/register/RegisterationForm";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getNextServerSession } from "@refineit/lib/auth";
 
 const Register: React.FC = async () => {
@@ -54,10 +55,10 @@ const Register: React.FC = async () => {
                     <RegisterationForm />
                     <div className="text-center">
                         <span>Already have an account? </span>
-                        <a href="/sign-in" className="font-medium hover:text-green-600" style={{
+                        <Link href="/sign-in" className="font-medium hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Sign In</a>
+                        }}>Sign In</Link>
                     </div>
                 </div>
                 <div className="flex justify-content-between px-4 sm:px-8 md:px-5 lg:px-4 xl:px-8">
@@ -65,15 +66,15 @@ const Register: React.FC = async () => {
                         <span>&copy;</span> 2024 Refine.It. All rights reserved
                     </div>
                     <div className="font-semibold text-xs text-center">
-                        <a href="#" className="hover:text-green-600" style={{
+                        <Link href="#" className="hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Privacy Policy</a>
+                        }}>Privacy Policy</Link>
                         <span className="mx-2">•</span>
-                        <a href="#" className="hover:text-green-600" style={{
+                        <Link href="#" className="hover:text-green-600" style={{
                             textDecoration: "none",
                             color: "var(--text-color)"
-                        }}>Terms & Conditions</a>
+                        }}>Terms & Conditions</Link>
                     </div>
                 </div>
             </div>
