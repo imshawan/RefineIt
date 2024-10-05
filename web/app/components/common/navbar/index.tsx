@@ -60,7 +60,7 @@ const Navigation: React.FC<{searchEnabled?: boolean}> = ({searchEnabled=true}) =
     );
 
     return (
-        <div className="card sticky top-0 z-5">
+        <div className="card sticky top-0" style={{zIndex: "99999"}}>
             <div className="hidden lg:block">
                 <Menubar model={removeIcons(items.current)} start={Logo} end={UserControls.bind(null, {searchEnabled})}
                     className="shadow-2 border-noround surface-overlay px-4 shadow-2 flex align-items-center justify-content-between relative lg:static" />

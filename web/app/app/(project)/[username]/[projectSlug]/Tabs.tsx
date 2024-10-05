@@ -4,7 +4,7 @@ import React from "react";
 import { TabPanel, TabView } from "primereact/tabview";
 import Overview from "./Overview";
 import { IProject } from "@refineit/types";
-import CodeViewer from "./CodeViewer";
+import {CodeReviewer} from "../../../../components/project";
 import ReviewSection from "./ReviewSection";
 import Discussions from "./Discussions";
 
@@ -21,7 +21,7 @@ const ProjectTabs: React.FC<{project: IProject}> = ({project}) => {
                 <Overview project={project} />
             </TabPanel>
             <TabPanel header="Code">
-                <CodeViewer />
+                <CodeReviewer project={project} />
             </TabPanel>
             <TabPanel header="Reviews">
                 <ReviewSection />
