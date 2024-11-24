@@ -2,8 +2,15 @@ import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { useRouter } from "next/navigation";
 
-const ReviewSection = () => {
+const ReviewSection: React.FC<{ project: any }> = ({ project }) =>{
+    const router = useRouter();
+
+    const handleReview = () => {
+        router.push(`/project/${project.slug}/review`);
+    };
+
     return (
         <div className="p-4">
             <div className="flex justify-content-between align-items-center mb-4">
@@ -12,6 +19,7 @@ const ReviewSection = () => {
                     label="Start New Review"
                     icon="pi pi-plus"
                     className="p-button-contrast"
+                    onClick={handleReview}
                 />
             </div>
             <DataTable

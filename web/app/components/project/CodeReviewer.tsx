@@ -10,9 +10,12 @@ import ace from "ace-builds/src-noconflict/ace";
 import { ContextMenu } from "primereact/contextmenu";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { MenuItem, MenuItemCommandEvent } from "primereact/menuitem";
-import "ace-builds/src-noconflict/theme-github_light_default";
+import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
 import { InputTextarea } from "primereact/inputtextarea";
+import { useBreakpoints } from "@refineit/hooks";
+import { useEditor } from "@refineit/hooks/editor";
+import { debounce } from "lodash";
 
 interface Annotation {
     row: number;
@@ -21,9 +24,15 @@ interface Annotation {
     type: AnnotationType
 }
 
+interface LineHash {
+    hash: string;
+    content: string;
+}
+
 interface CodeReviewerProps {
     project: any;
     mode?: "view" | "review" | "difference";
+    height?: string;
 }
 
 type AnnotationType = "error" | "warning" | "info";
@@ -54,16 +63,19 @@ const useStyles = tss.create((props: any) => (
     }
 ));
 
-export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "view" }) => {
+export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "view", height }) => {
+    const { setAdditionsAndDeletions } = useEditor();
     const [loading, setLoading] = React.useState(true);
     const [code, setCode] = React.useState("");
+    const [editorContent, setEditorContent] = React.useState("");
     const [language, setLanguage] = React.useState("");
     const [languageLoaded, setLanguageLoaded] = React.useState(false);
     const [isFullScreen, setIsFullscreen] = React.useState(false);
     const [annotations, setAnnotations] = React.useState<Annotation[]>([]);
     const [text, setText] = React.useState("");
     const [selectedType, setSelectedType] = React.useState("");
-    
+    const breakpoints = useBreakpoints();
+
     const { classes } = useStyles({ isFullScreen });
 
     const annotationMeta = React.useRef({ row: 0, column: 0, type: "" });
@@ -71,6 +83,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
     const aceRef = React.useRef<AceEditor | null>(null);
     const cm = React.useRef<ContextMenu>(null);
     const op = React.useRef<OverlayPanel>(null);
+
     const labels = {
         warning: "Suggest Update",
         info: "Comment",
@@ -123,6 +136,25 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
         aceRef.current?.editor.getSession().setAnnotations(updatedAnnotations);
     };
 
+    const getRowPosition = (row: number) => {
+        if (breakpoints("sm")) {
+            return row + 1;
+        }
+        if (breakpoints("md")) {
+            return row - 1;
+        }
+        if (breakpoints("lg")) {
+            return row - 4;
+        }
+        if (breakpoints("xl")) {
+            return row - 4;
+        }
+        if (isFullScreen) {
+            return row - 3;
+        }
+        return row + 3;
+    }
+
     const handleAnnotation = (type: AnnotationType, event: MenuItemCommandEvent) => {
         setSelectedType(labels[type]);
 
@@ -134,7 +166,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
 
             // Convert the screen coordinates to editor line and column
             const position = editor.renderer.screenToTextCoordinates(clientX, clientY);
-            const row = position.row - 1; // Line number substracted 1 
+            const row = getRowPosition(position.row);
             const column = position.column; // Column number
 
             op.current?.toggle(event.originalEvent as React.MouseEvent)
@@ -157,11 +189,66 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
         cm.current?.show(event)
     };
 
+    const handleEditorChange = (value: string) => {
+        setEditorContent(value);
+    }
+
     const items: MenuItem[] = [
         { label: labels.info, icon: "pi pi-plus-circle", command: handleAnnotation.bind(null, "info") },
         { label: labels.warning, icon: "pi pi-comment", command: handleAnnotation.bind(null, "warning") },
         { label: labels.error, icon: "pi pi-exclamation-triangle", command: handleAnnotation.bind(null, "error") },
     ];
+
+    // Longest Common Subsequence implementation
+    const findLCS = (arr1: LineHash[], arr2: LineHash[]): number => {
+        const m: number = arr1.length;
+        const n: number = arr2.length;
+        const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+        for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+                if (arr1[i - 1].hash === arr2[j - 1].hash) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        return dp[m][n];
+    };
+
+    const calculateDiff = React.useCallback((newValue: string): void => {
+        const oldLines: string[] = code.split("\n");
+        const newLines: string[] = newValue.split("\n");
+
+        const oldHashes: LineHash[] = oldLines.map(line => ({
+            hash: line.trim(),
+            content: line
+        }));
+
+        const newHashes: LineHash[] = newLines.map(line => ({
+            hash: line.trim(),
+            content: line
+        }));
+
+        const lcs: number = findLCS(oldHashes, newHashes);
+
+        setAdditionsAndDeletions({
+            additions: newLines.length - lcs,
+            deletions: oldLines.length - lcs
+        })
+    }, [code, setAdditionsAndDeletions]);
+
+    const debouncedCalculate = debounce((newValue: string): void => {
+        calculateDiff(newValue);
+    }, 3000);
+
+    React.useEffect(() => {
+        return () => {
+            debouncedCalculate.cancel();
+        };
+    }, [debouncedCalculate]);
 
     React.useEffect(() => {
         const loadMode = async () => {
@@ -182,6 +269,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
         setLoading(true)
         http.get("https://raw.githubusercontent.com/imshawan/snippetscloud/refs/heads/main/Scrapers/cbseschools.py", {}, true).then((res) => {
             setCode(res as string);
+            setEditorContent(res as string);
         }).catch((err) => {
             console.log(err);
         }).finally(() => {
@@ -221,7 +309,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
                     <AceEditor
                         ref={aceRef}
                         mode={languageLoaded ? language : ""}
-                        theme="github_light_default" // Set the theme (use any preferred theme)
+                        theme="github_dark" // Set the theme (use any preferred theme)
                         value={code}
                         name="code-diff-editor"
                         editorProps={{ $blockScrolling: true }}
@@ -232,8 +320,9 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
                             fontSize: 14
                         }}
                         width="100%"
-                        height="calc(100vh - 74px)"
+                        height={height || "calc(100vh - 74px)"}
                         readOnly={mode === "view"}
+                        onChange={debouncedCalculate}
                     />
                 )}
                 <ContextMenu model={items} ref={cm} breakpoint="767px" />

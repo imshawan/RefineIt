@@ -6,6 +6,7 @@ import { handleStar } from "@refineit/store/project";
 import { useSession } from "next-auth/react";
 import { UserTokenStore } from "@refineit/lib";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { formatNumberWithMetricPrefix } from "@refineit/utilities";
 import LoginPopup from "@refineit/components/common/LoginPrompt";
 
@@ -18,6 +19,7 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
 
     const starsCount = React.useMemo(() => formatNumberWithMetricPrefix(stars), [stars]);
     const reviewsCount = React.useMemo(() => formatNumberWithMetricPrefix(reviews), [reviews]);
+    const router = useRouter();
 
     const handleStarOnClick = async () => {
         if (!session) return setShowLogin(true);
@@ -41,8 +43,9 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
             setStarred(!starred);
         }
     };
+    
     const handleReview = () => {
-
+        router.push(`/project/${project.slug}/review`);
     };
 
     return (

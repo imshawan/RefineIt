@@ -8,7 +8,7 @@ interface Owner {
     username: string;
 }
 
-const ProjectHeader: React.FC<{ project: any }> = ({ project }) => {
+const ProjectHeader: React.FC<{ project: any }> = ({ project={} }) => {
     const priorities: Record<string, BadgeSeverityType> = {
         "low": "info",
         "medium": "warning",
@@ -19,10 +19,10 @@ const ProjectHeader: React.FC<{ project: any }> = ({ project }) => {
         <React.Fragment>
             <div className="flex flex-column md:flex-row justify-content-between align-items-center p-4 xl:px-0">
                 <div className="flex flex-column sm:w-12 md:w-8">
-                    <h1 className="text-4xl font-bold mb-0">{project?.slug}</h1>
-                    <p className="text-lg mb-3 mt-2">{project.description}</p>
+                    <h1 style={{fontSize: "1.5rem", fontWeight: 600, color: "var(--surface-900)", marginBottom: "0.2rem"}}>{project?.slug}</h1>
+                    <p className="mb-3 mt-2">{project?.description}</p>
                     <div className="flex gap-2">
-                        {project.tags.map((tag: any, index: any) => (
+                        {project?.tags?.map((tag: any, index: any) => (
                             <Badge
                                 key={index}
                                 value={tag}
