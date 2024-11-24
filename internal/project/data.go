@@ -306,11 +306,12 @@ func GetProjectBy(field string, value string, caller string) (models.Project, er
 		LEFT JOIN users ON project.owner_id = users.id WHERE project.%s = $1`, strings.Join(fields, ", "), ownerFieldList, field)
 
 	var ownerRaw json.RawMessage
+	var language json.RawMessage
 	var selfStarred bool
 	err := database.Client.QueryRow(query, value, caller).Scan(&projectData.ID, &projectData.Name, &projectData.Slug, &projectData.Description, &projectData.About, &projectData.ReviewType, &projectData.RepositoryURL, &projectData.Filename, &projectData.FileUrl,
 		&projectData.Visibility, &projectData.OwnerID, pq.Array(&projectData.Tags), &projectData.ReviewsCount, &projectData.StarsCount,
 		&projectData.LastReviewedAt, &projectData.IsFeatured, &projectData.ContributorsCount,
-		&projectData.Priority, &projectData.CreatedAt, &projectData.UpdatedAt, &ownerRaw, &selfStarred)
+		&projectData.Priority, &projectData.CreatedAt, &projectData.UpdatedAt, &language, &ownerRaw, &selfStarred)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Handle the case where no rows were found
@@ -328,8 +329,15 @@ func GetProjectBy(field string, value string, caller string) (models.Project, er
 		return projectData, err // Handle JSON unmarshal error
 	}
 
+	var langJSON map[string]interface{}
+	err = json.Unmarshal(language, &langJSON)
+	if err != nil {
+		return projectData, err
+	}
+
 	projectData.Owner = ownerMap
 	projectData.SelfStarred = &selfStarred
+	projectData.Language = langJSON
 
 	return projectData, nil
 }

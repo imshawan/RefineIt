@@ -24,6 +24,7 @@ CREATE TABLE
     priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')), -- Priority field with validation
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    language JSONB,
     CONSTRAINT project_owner
         FOREIGN KEY(owner_id) 
         REFERENCES users(id)

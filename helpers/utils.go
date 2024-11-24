@@ -21,6 +21,27 @@ func IsZero(v reflect.Value) bool {
     return reflect.DeepEqual(v.Interface(), zero)
 }
 
+func StructToMap(input interface{}) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+	val := reflect.ValueOf(input)
+
+	// Ensure the input is a struct
+	if val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("input must be a struct")
+	}
+
+	// Iterate through struct fields
+	typ := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		fieldValue := val.Field(i)
+
+		// Add field name and value to the map
+		result[field.Name] = fieldValue.Interface()
+	}
+
+	return result, nil
+}
 
 func GenerateUUID() (string, error) {
 	uuidV6, err := uuid.NewV6()

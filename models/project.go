@@ -61,6 +61,7 @@ type Project struct {
 	RepositoryURL     *string                `json:"repository_url,omitempty"` // Optional URL to a github repository
 	Filename          string                 `json:"filename" binding:"required"`
 	FileUrl           string                 `json:"file_url"`
+	Language	      map[string]interface{} `json:"language"`
 	Visibility        ProjectVisibility      `json:"visibility" binding:"required"`                     // 'public' or 'private'
 	OwnerID           string                 `json:"owner_id"`                                          // ID of the user who owns the project
 	Owner             map[string]interface{} `json:"owner"`                                             // ID of the user who owns the project

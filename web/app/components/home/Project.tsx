@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ActionMenu } from "../common";
 import OwnerInfo from "./OwnerInfo";
+import Image from "next/image";
 
 interface ProjectCardProps {
     project: IProject;
@@ -150,7 +151,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     </Link>
                     <div className={classes.infoItem}>
                         <i className={`${classes.icon} pi pi-code`} />
-                        Languages: {project.priority}
+                        Language: <div className="pl-2 flex">
+                            <Image className="mr-1" src={project.language?.iconUrl} height={18} width={18} alt={project.language?.language} />
+                            <span className="text-xs align-self-end">{project.language?.language}</span>
+                        </div>
                     </div>
                 </div>
 

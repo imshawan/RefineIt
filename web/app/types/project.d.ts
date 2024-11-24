@@ -6,6 +6,7 @@ export interface IProject {
     description: string;
     file_url: string;
     filename: string;
+    language: Language;
     is_featured: boolean;
     last_reviewed_at: string | null;
     name: string;
@@ -20,6 +21,12 @@ export interface IProject {
     tags: Array<string>;
     updated_at: string;
     visibility: string;
+}
+
+interface Language {
+    color: string;
+    iconUrl: string;
+    language: string
 }
 
 interface IProjectOwner {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -11,13 +12,14 @@ import (
 	"github.com/imshawan/RefineIt/infra/database"
 	"github.com/imshawan/RefineIt/internal/user"
 	"github.com/imshawan/RefineIt/models"
+	"github.com/imshawan/RefineIt/pkg/langmapper"
 	"github.com/lib/pq"
 )
 
 var ProjectFields = []string{
 	"id", "name", "slug", "description", "about", "review_type", "repository_url", "filename", "file_url", "visibility", "owner_id",
 	"tags", "reviews_count", "stars_count", "last_reviewed_at", "is_featured", "contributors_count",
-	"priority", "created_at", "updated_at",
+	"priority", "created_at", "updated_at", "language",
 }
 
 func CreateProject(project models.Project) (models.Project, error) {
@@ -65,6 +67,23 @@ func CreateProject(project models.Project) (models.Project, error) {
 		project.IsFeatured = &defaultIsFeatured
 	}
 
+	var language langmapper.LanguageInfo
+	var languageJSON []byte
+	if project.Filename != "" {
+		re := regexp.MustCompile(`^[a-zA-Z0-9_\-]+\.[a-zA-Z0-9]+$`)
+		if isValid := re.MatchString(project.Filename); isValid {
+			lang, found := langmapper.DetectLanguageFromExtension(project.Filename)
+			if found {
+				language = lang
+			}
+		}
+	}
+
+	langJSON, err := json.Marshal(language)
+	if err != nil {
+		fmt.Printf("Error marshalling LanguageInfo: %v\n", err)
+	}
+
 	now := time.Now()
 	id, err := helpers.GenerateUUID()
 	if err != nil {
@@ -90,10 +109,10 @@ func CreateProject(project models.Project) (models.Project, error) {
 	errs := database.Client.QueryRow(query, project.ID, project.Name, project.Slug, project.Description, project.About, project.ReviewType, project.RepositoryURL, project.Filename, project.FileUrl,
 		project.Visibility, project.OwnerID, pq.Array(project.Tags), project.ReviewsCount, project.StarsCount,
 		project.LastReviewedAt, project.IsFeatured, project.ContributorsCount,
-		project.Priority, project.CreatedAt, project.UpdatedAt).Scan(&project.ID, &project.Name, &project.Slug, &project.Description, &project.About, &project.ReviewType, &project.RepositoryURL, &project.Filename, &project.FileUrl,
+		project.Priority, project.CreatedAt, project.UpdatedAt, langJSON).Scan(&project.ID, &project.Name, &project.Slug, &project.Description, &project.About, &project.ReviewType, &project.RepositoryURL, &project.Filename, &project.FileUrl,
 		&project.Visibility, &project.OwnerID, pq.Array(&project.Tags), &project.ReviewsCount, &project.StarsCount,
 		&project.LastReviewedAt, &project.IsFeatured, &project.ContributorsCount,
-		&project.Priority, &project.CreatedAt, &project.UpdatedAt)
+		&project.Priority, &project.CreatedAt, &project.UpdatedAt, &languageJSON)
 
 	if errs != nil {
 		// Check for unique violation error code
@@ -119,6 +138,11 @@ func CreateProject(project models.Project) (models.Project, error) {
 		fmt.Printf("error unmarshalling owner JSON: %v", err)
 	} else {
 		project.Owner = ownerMap
+	}
+
+	err = json.Unmarshal(languageJSON, &project.Language)
+	if err != nil {
+		fmt.Printf("Error unmarshalling language JSON: %v\n", err)
 	}
 
 	return project, nil

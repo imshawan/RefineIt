@@ -24,7 +24,7 @@ const ProjectProfileScreen: React.FC<ProjectProfileProps> = async ({params}) => 
 
     const data = await getProjectBySlug({slug: params.projectSlug}) as ApiResponse.IBaseResponse;
     if (typeof data != "object") return null
-    
+
     return (
         <React.Fragment>
             <Navigation searchEnabled={false} />
