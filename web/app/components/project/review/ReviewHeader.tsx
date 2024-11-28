@@ -33,6 +33,7 @@ const useStyles = tss.create(() => ({
         fontWeight: 600,
         color: "var(--surface-900)",
         marginBottom: "0.2rem",
+        marginTop: 0
     },
     fileName: {
         color: "#718096",
@@ -113,7 +114,7 @@ export const ReviewHeader: React.FC<CodeReviewHeaderProps> = ({ project = {} }) 
                             </h1>
                             <span className={classes.fileName}>
                                 📁 {filePath}
-                                <Badge value="TypeScript" severity="info" />
+                                <Badge value={project.language?.language} severity="info" />
                             </span>
                         </div>
                     </div>

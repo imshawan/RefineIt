@@ -1,6 +1,7 @@
 import React from "react";
 import { Badge } from "primereact/badge";
 import { BadgeSeverityType, IProject } from "@refineit/types";
+import { getReviewTypeByKey } from "@refineit/utilities";
 
 interface Owner {
     fullname: string;
@@ -14,6 +15,8 @@ const ProjectHeader: React.FC<{ project: any }> = ({ project={} }) => {
         "medium": "warning",
         "high": "danger",
     }
+
+    const reviewType = React.useMemo(() => getReviewTypeByKey(project.review_type), [project]);
 
     return (
         <React.Fragment>
@@ -34,9 +37,9 @@ const ProjectHeader: React.FC<{ project: any }> = ({ project={} }) => {
                 </div>
                 <div className="flex flex-column align-items-center md:align-items-end mt-4 md:mt-0">
                     <div className="flex gap-2 justify-content-evenly">
-                        <Badge value={"medium"} className="py-0" severity={priorities["high"]} />
-                        <Badge value={"Feature Request"} className="bg-white text-black-alpha-90 border-1 border-black-alpha-10 py-0" />
-                        <Badge value={"JavaScript"} className="py-0" />
+                        <Badge value={project.priority} className="py-0" severity={priorities["high"]} />
+                        <Badge value={reviewType && reviewType.label} className="bg-white text-black-alpha-90 border-1 border-black-alpha-10 py-0" />
+                        <Badge value={project.language?.language} className="py-0" />
                     </div>
                 </div>
             </div>

@@ -12,6 +12,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { MenuItem, MenuItemCommandEvent } from "primereact/menuitem";
 import "ace-builds/src-noconflict/theme-github_dark";
 import "ace-builds/src-noconflict/ext-language_tools";
+import beautify from "ace-builds/src-noconflict/ext-beautify";
 import { InputTextarea } from "primereact/inputtextarea";
 import { useBreakpoints } from "@refineit/hooks";
 import { useEditor } from "@refineit/hooks/editor";
@@ -251,9 +252,15 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
     }, [debouncedCalculate]);
 
     React.useEffect(() => {
+        if (project && project.language) {
+            setLanguage(project.language.language);
+        }
+    }, [project]);
+
+    React.useEffect(() => {
         const loadMode = async () => {
             setLanguageLoaded(false);
-            const mode = language; // Get the mode for the selected language
+            const mode = String(language).toLowerCase(); // Get the mode for the selected language
             if (mode) {
                 await import(`ace-builds/src-noconflict/mode-${mode}`);
                 ace.config.set("mode", mode); // Set the mode for the Ace editor
@@ -267,13 +274,13 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
 
     React.useEffect(() => {
         setLoading(true)
-        http.get("https://raw.githubusercontent.com/imshawan/snippetscloud/refs/heads/main/Scrapers/cbseschools.py", {}, true).then((res) => {
+        http.get(project.file_url, {}, true).then((res) => {
             setCode(res as string);
             setEditorContent(res as string);
         }).catch((err) => {
             console.log(err);
         }).finally(() => {
-            setLoading(false)
+            setLoading(false);
         });
 
     }, [project.file_url]);
@@ -308,7 +315,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
                 {loading ? <ProgressSpinner className={classes.loader} /> : (
                     <AceEditor
                         ref={aceRef}
-                        mode={languageLoaded ? language : ""}
+                        mode={languageLoaded ? String(language).toLowerCase() : ""}
                         theme="github_dark" // Set the theme (use any preferred theme)
                         value={code}
                         name="code-diff-editor"

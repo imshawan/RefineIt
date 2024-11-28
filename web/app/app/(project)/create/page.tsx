@@ -18,6 +18,7 @@ import { Badge } from "primereact/badge";
 import Navigation from "@refineit/components/common/navbar";
 import { Divider } from "primereact/divider";
 import { isAllowedCodeExtension } from "@refineit/utilities/files";
+import { reviewTypes, priorities, visibility } from "@refineit/utilities";
 import { allowedCodeExtensions, externals } from "@refineit/common";
 import { Overlay } from "@refineit/components/common";
 import { createProject } from "@refineit/store/project";
@@ -54,24 +55,6 @@ const ProjectCreation = () => {
     const currentRepoUrl = useRef<string>("");
     const fileUploadRef = React.useRef<FileUpload>(null);
     const user = React.useMemo(() => session?.user, [session?.user]);
-
-    const reviewTypes = [
-        { label: "Code Quality", value: "quality" },
-        { label: "Security Audit", value: "security" },
-        { label: "Performance Review", value: "performance" },
-        { label: "Feature Implementation", value: "feature" },
-    ];
-
-    const visibility = [
-        { label: "Public", value: "public" },
-        { label: "Private", value: "private" },
-    ]
-
-    const priorities = [
-        { label: "High", value: "high" },
-        { label: "Medium", value: "medium" },
-        { label: "Low", value: "low" },
-    ]
 
     const updateProgress = () => {
         let completed = 0;
