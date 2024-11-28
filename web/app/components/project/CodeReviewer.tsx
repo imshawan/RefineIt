@@ -65,10 +65,9 @@ const useStyles = tss.create((props: any) => (
 ));
 
 export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "view", height }) => {
-    const { setAdditionsAndDeletions } = useEditor();
+    const { setAdditionsAndDeletions, setCode: setEditorCode, code: editorCode } = useEditor();
     const [loading, setLoading] = React.useState(true);
     const [code, setCode] = React.useState("");
-    const [editorContent, setEditorContent] = React.useState("");
     const [language, setLanguage] = React.useState("");
     const [languageLoaded, setLanguageLoaded] = React.useState(false);
     const [isFullScreen, setIsFullscreen] = React.useState(false);
@@ -116,7 +115,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
     };
 
     const downloadFile = () => {
-        const blob = new Blob([code], { type: "text/plain" }); // Create a Blob from the text content
+        const blob = new Blob([editorCode], { type: "text/plain" }); // Create a Blob from the text content
         const url = URL.createObjectURL(blob);
 
         const a = document.createElement("a");
@@ -190,10 +189,6 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
         cm.current?.show(event)
     };
 
-    const handleEditorChange = (value: string) => {
-        setEditorContent(value);
-    }
-
     const items: MenuItem[] = [
         { label: labels.info, icon: "pi pi-plus-circle", command: handleAnnotation.bind(null, "info") },
         { label: labels.warning, icon: "pi pi-comment", command: handleAnnotation.bind(null, "warning") },
@@ -222,6 +217,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
     const calculateDiff = React.useCallback((newValue: string): void => {
         const oldLines: string[] = code.split("\n");
         const newLines: string[] = newValue.split("\n");
+        console.log(newLines)
 
         const oldHashes: LineHash[] = oldLines.map(line => ({
             hash: line.trim(),
@@ -238,8 +234,9 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
         setAdditionsAndDeletions({
             additions: newLines.length - lcs,
             deletions: oldLines.length - lcs
-        })
-    }, [code, setAdditionsAndDeletions]);
+        });
+        setEditorCode(newLines.join("\n"))
+    }, [code, setAdditionsAndDeletions, setEditorCode]);
 
     const debouncedCalculate = debounce((newValue: string): void => {
         calculateDiff(newValue);
@@ -276,14 +273,14 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
         setLoading(true)
         http.get(project.file_url, {}, true).then((res) => {
             setCode(res as string);
-            setEditorContent(res as string);
+            setEditorCode(res as string)
         }).catch((err) => {
             console.log(err);
         }).finally(() => {
             setLoading(false);
         });
 
-    }, [project.file_url]);
+    }, [project.file_url, setEditorCode]);
 
 
     return (
@@ -317,7 +314,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
                         ref={aceRef}
                         mode={languageLoaded ? String(language).toLowerCase() : ""}
                         theme="github_dark" // Set the theme (use any preferred theme)
-                        value={code}
+                        value={editorCode}
                         name="code-diff-editor"
                         editorProps={{ $blockScrolling: true }}
                         setOptions={{
