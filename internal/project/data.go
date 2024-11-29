@@ -283,6 +283,7 @@ func GetProjectByIdWithOwner(id string, caller string) (models.Project, error) {
 	return GetProjectBy("id", id, caller)
 }
 
+// We need the caller information here so that we could determine if the person has starred the project or not
 func GetProjectBy(field string, value string, caller string) (models.Project, error) {
 	var projectData models.Project
 	var fields []string

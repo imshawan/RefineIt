@@ -98,8 +98,6 @@ export const ReviewHeader: React.FC<CodeReviewHeaderProps> = ({ project = {} }) 
 
     const filePath = React.useMemo(() => extractRepoFilePath(project.file_url), [project]);
 
-    console.log(project)
-
     return (
         <div className="p-4 xl:px-0">
             <div>

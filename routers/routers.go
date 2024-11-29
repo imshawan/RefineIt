@@ -40,6 +40,7 @@ func SetupRouters() *gin.Engine {
 	RegisterAuthRoutes(router.Group("/api/auth"))
 	RegisterCommonRoutes(router.Group("/api/common"))
 	RegisterProjectRoutes(router.Group("/api/projects"))
+	RegisterReviewRoutes(router.Group("/api/reviews"))
 
 	return router
 }

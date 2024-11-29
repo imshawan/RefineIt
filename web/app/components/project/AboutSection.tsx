@@ -96,7 +96,6 @@ export const AboutSection: React.FC<IAboutSectionProps> = ({ content, name, proj
             onChange={handleEditorChange}
             options={editorOptions}
             getMdeInstance={(instance) => {
-                console.log("new instance", instance);
                 editorRef.current = instance;
             }}
         />

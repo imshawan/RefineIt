@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { formatNumberWithMetricPrefix } from "@refineit/utilities";
 import LoginPopup from "@refineit/components/common/LoginPrompt";
+import { getReviewByProjectAndUser, startNewReview } from "@refineit/store/review";
 
 export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
     const { data: session } = useSession();
@@ -16,6 +17,8 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
     const [stars, setStars] = React.useState(Number(project.stars_count) || 0);
     const [reviews, setReviews] = React.useState(Number(project.reviews_count) || 0);
     const [showLogin, setShowLogin] = React.useState(false);
+    const [reviewExists, setReviewExists] = React.useState(false);
+    const [loading, setLoading] = React.useState(true);
 
     const starsCount = React.useMemo(() => formatNumberWithMetricPrefix(stars), [stars]);
     const reviewsCount = React.useMemo(() => formatNumberWithMetricPrefix(reviews), [reviews]);
@@ -44,14 +47,42 @@ export const OverviewActions: React.FC<{ project: any }> = ({ project }) => {
         }
     };
     
-    const handleReview = () => {
+    const handleReview = async () => {
+        setLoading(true);
+        if (!reviewExists) {
+            if (!session) return setShowLogin(true);
+
+            UserTokenStore.parseAndSetTokenInfo(session);
+            await startNewReview({ project_id: project.id });
+        }
+        
         router.push(`/project/${project.slug}/review`);
+        setLoading(false);
     };
+
+    React.useEffect(() => {
+        if (!session) return;
+
+        UserTokenStore.parseAndSetTokenInfo(session);
+        setLoading(true);
+        getReviewByProjectAndUser({projectId: project.id}).then(resp => {
+            if (typeof resp === "string") {
+                return;
+            }
+            if (resp.statusCode > 399) {
+                return setReviewExists(false);
+            }
+            if (resp.response && Object.keys(resp.response)) {
+                setReviewExists(true);
+            }
+        }).catch(err => {})
+        .finally(() => setLoading(false));
+    }, [session]);
 
     return (
         <React.Fragment>
             <div className="w-12 md:w-4 md:pl-4">
-                <Button onClick={handleReview} label="Start a Review" className="p-button-contrast w-full mb-4" icon="pi pi-comment" />
+                <Button onClick={handleReview} loading={loading} label="Start a Review" className="p-button-contrast w-full mb-4" icon="pi pi-comment" />
                 <Button onClick={handleStarOnClick} label={starred ? "Starred" : "Star Project"} className="mb-4 w-full p-button-tertiary" icon={starred ? "pi pi-star-fill" : "pi pi-star"} />
                 <Button label="Project Settings" className="mb-4 w-full p-button-outlined" icon="pi pi-cog" />
                 <div className="flex grid mx-0 justify-content-between">

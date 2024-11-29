@@ -17,6 +17,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { useBreakpoints } from "@refineit/hooks";
 import { useEditor } from "@refineit/hooks/editor";
 import { debounce } from "lodash";
+import { IReview } from "@refineit/types";
 
 interface Annotation {
     row: number;
@@ -34,6 +35,7 @@ interface CodeReviewerProps {
     project: any;
     mode?: "view" | "review" | "difference";
     height?: string;
+    reviewInfo: IReview
 }
 
 type AnnotationType = "error" | "warning" | "info";
@@ -64,7 +66,7 @@ const useStyles = tss.create((props: any) => (
     }
 ));
 
-export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "view", height }) => {
+export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "view", height, reviewInfo }) => {
     const { setAdditionsAndDeletions, setCode: setEditorCode, code: editorCode } = useEditor();
     const [loading, setLoading] = React.useState(true);
     const [code, setCode] = React.useState("");
@@ -217,7 +219,6 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
     const calculateDiff = React.useCallback((newValue: string): void => {
         const oldLines: string[] = code.split("\n");
         const newLines: string[] = newValue.split("\n");
-        console.log(newLines)
 
         const oldHashes: LineHash[] = oldLines.map(line => ({
             hash: line.trim(),
@@ -270,7 +271,16 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
     }, [language]);
 
     React.useEffect(() => {
-        setLoading(true)
+        if (!reviewInfo || !Object.keys(reviewInfo).length) return;
+
+        if (reviewInfo.content && reviewInfo.content.length > 1) {
+            setCode(reviewInfo.content);
+            setEditorCode(reviewInfo.content);
+
+            return;
+        }
+
+        setLoading(true);
         http.get(project.file_url, {}, true).then((res) => {
             setCode(res as string);
             setEditorCode(res as string)
@@ -280,7 +290,7 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({ project, mode = "vie
             setLoading(false);
         });
 
-    }, [project.file_url, setEditorCode]);
+    }, [project.file_url, setEditorCode, reviewInfo]);
 
 
     return (

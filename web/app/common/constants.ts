@@ -20,6 +20,10 @@ export const endpoints = {
         GET_BY_SLUG: API_SERVER_HOST + "/api/projects/{{slug}}",
         STAR: API_SERVER_HOST + "/api/projects/star/{{id}}",
         UN_STAR: API_SERVER_HOST + "/api/projects/unstar/{{id}}",
+    },
+    REVIEWS: {
+        NEW: API_SERVER_HOST + "/api/reviews/new",
+        GET_BY_PROJECT_USER: API_SERVER_HOST + "/api/reviews/project/{{projectId}}",
     }
 }
 

@@ -28,7 +28,6 @@ const ContactUs: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Form submitted:", formData);
         toast.current?.show({ severity: "success", summary: "Success", detail: "Message sent successfully!", life: 3000 });
         setFormData({ name: "", email: "", message: "" });
     };

@@ -6,6 +6,8 @@ import { getNextServerSession } from "@refineit/lib/auth";
 import { ApiResponse, IProject } from "@refineit/types";
 import { CodeReviewer, ReviewHeader } from "@refineit/components/project";
 import { ReviewAction } from "@refineit/components/project/review/ReviewActions";
+import { getReviewByProjectAndUser } from "@refineit/store/review";
+import { IReview } from "@refineit/types";
 
 interface ProjectProfileProps {
     params: {
@@ -21,8 +23,15 @@ const ProjectProfileScreen: React.FC<ProjectProfileProps> = async ({params}) => 
         UserTokenStore.setTokenInfo(user);
     }
 
+    let reviewData;
+
     const data = await getProjectBySlug({slug: params.projectSlug}) as ApiResponse.IBaseResponse;
-    if (typeof data != "object") return null
+    if (typeof data != "object") return null;
+
+    const review = await getReviewByProjectAndUser({projectId: data.response.id});
+    if (review && typeof review === "object" && review.response) {
+        reviewData = review.response as IReview;
+    }
     
     return (
         <React.Fragment>
@@ -32,7 +41,7 @@ const ProjectProfileScreen: React.FC<ProjectProfileProps> = async ({params}) => 
                     <ReviewHeader project={data.response} />
                 </div>
                 <div className="w-full p-4 xl:px-0 py-0">
-                    <CodeReviewer project={data.response as IProject} mode="review" />
+                    <CodeReviewer reviewInfo={reviewData as IReview} project={data.response as IProject} mode="review" />
                 </div>
                 <div className="w-full p-4 xl:px-0">
                     <ReviewAction project={data.response} />

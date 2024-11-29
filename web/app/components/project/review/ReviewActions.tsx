@@ -31,8 +31,6 @@ export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {} }) 
 
     const handleSubmitReview = () => {}
 
-    console.log(project)
-
     return (
         <div className={classes.reviewersSection}>
             <Button

@@ -93,7 +93,6 @@ export default function RegisterationForm() {
             setUsernameExists(true);
         }
 
-        console.log("Username availability:", data);
     }, 500);
 
 
