@@ -21,7 +21,7 @@ const ProjectTabs: React.FC<{project: IProject}> = ({project}) => {
                 <Overview project={project} />
             </TabPanel>
             <TabPanel header="Code">
-                <CodeReviewer project={project} mode="view" />
+                <CodeReviewer project={project as IProject} mode="view" />
             </TabPanel>
             <TabPanel header="Reviews">
                 <ReviewSection project={project} />

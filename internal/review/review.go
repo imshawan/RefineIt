@@ -1,6 +1,7 @@
 package review
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -78,6 +79,60 @@ func CreateReview(review models.Review) (models.Review, error) {
 		}
 		fmt.Println(errs)
 		return review, fmt.Errorf("error inserting a review into the database")
+	}
+
+	return review, nil
+}
+
+func UpdateReviewContent(reviewID string, review models.Review, reviewerID string) (models.Review, error) {
+	if reviewID == "" {
+		return review, errors.New("review id is required")
+	}
+	if reviewerID == "" {
+		return review, errors.New("reviewer ID is required")
+	}
+
+	// Lets check if the review exists of not, if exists, whether the person is allowed to edit
+	var authorID string
+	err := database.Client.QueryRow("SELECT reviewer_id FROM reviews WHERE id = $1", reviewID).Scan(&authorID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return review, errors.New("review not found")
+		}
+		return review, err
+	}
+	if authorID != reviewerID {
+		return review, errors.New("unauthorized: you are not the author of this review")
+	}
+
+	// Check which fields to update
+	updateFields := []string{}
+	args := []interface{}{}
+	argIndex := 1
+
+	if review.Content != "" {
+		updateFields = append(updateFields, fmt.Sprintf("content = $%d", argIndex))
+		args = append(args, review.Content)
+		argIndex++
+	}
+
+	if review.Title != "" {
+		updateFields = append(updateFields, fmt.Sprintf("title = $%d", argIndex))
+		args = append(args, review.Title)
+		argIndex++
+	}
+
+	if len(updateFields) == 0 {
+		return review, nil
+	}
+
+	// Added the condition for the review ID
+	args = append(args, reviewID)
+
+	query := fmt.Sprintf("UPDATE reviews SET %s WHERE id = $%d", strings.Join(updateFields, ", "), argIndex)
+	_, err = database.Client.Exec(query, args...)
+	if err != nil {
+		return review, err
 	}
 
 	return review, nil

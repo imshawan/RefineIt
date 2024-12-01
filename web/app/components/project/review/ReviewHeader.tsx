@@ -2,13 +2,21 @@
 
 import React from "react";
 import { tss } from "tss-react";
-import { BadgeSeverityType } from "@refineit/types";
+import { BadgeSeverityType, IReview } from "@refineit/types";
 import { Badge } from "primereact/badge";
+import { PrimeIcons } from 'primereact/api';
+import { InputText } from 'primereact/inputtext';
 import { extractRepoFilePath } from "@refineit/utilities/files";
 import { useEditor } from "@refineit/hooks/editor";
+import { Button } from "primereact/button";
+import { http, parseParams } from "@refineit/utilities";
+import { endpoints } from "@refineit/common";
+import { useSession } from "next-auth/react";
+import { UserTokenStore } from "@refineit/lib";
 
 interface CodeReviewHeaderProps {
     project?: any;
+    review?: IReview;
 }
 
 const useStyles = tss.create(() => ({
@@ -84,11 +92,25 @@ const useStyles = tss.create(() => ({
         display: "flex",
         gap: "0.75rem",
     },
+    editIconContainer: {
+        position: "absolute",
+        top: "3px",
+        right: "3px",
+        color: "var(--surface-600)",
+        cursor: "pointer",
+        fontSize: "1rem",
+        "&:focus": {
+            boxShadow: "none",
+        }
+    }
 }));
 
-export const ReviewHeader: React.FC<CodeReviewHeaderProps> = ({ project = {} }) => {
+export const ReviewHeader: React.FC<CodeReviewHeaderProps> = ({ project = {}, review }) => {
+    const {data: session} = useSession();
     const { classes } = useStyles();
     const {additions, deletions} = useEditor();
+    const [editing, setEditing] = React.useState(false);
+    const [title, setTitle] = React.useState(review?.title || project?.name);
 
     const priorities: Record<string, BadgeSeverityType> = {
         "low": "info",
@@ -98,6 +120,16 @@ export const ReviewHeader: React.FC<CodeReviewHeaderProps> = ({ project = {} }) 
 
     const filePath = React.useMemo(() => extractRepoFilePath(project.file_url), [project]);
 
+    const handleEditing = () => {
+        setEditing(!editing);
+        
+        http.put(parseParams(endpoints.REVIEWS.UPDATE_CONTENT, {reviewId: review?.id}), {title, project_id: project.id})
+    }
+
+    React.useEffect(() => {
+        UserTokenStore.parseAndSetTokenInfo(session);
+    }, [session]);
+
     return (
         <div className="p-4 xl:px-0">
             <div>
@@ -106,14 +138,16 @@ export const ReviewHeader: React.FC<CodeReviewHeaderProps> = ({ project = {} }) 
                         <div className={classes.projectIcon}>
                             <i className="pi pi-folder text-2xl" />
                         </div>
-                        <div className="w-10">
+                        <div className="w-10 relative">
                             <h1 className={classes.projectTitle}>
-                                {project?.name || "Project Name"}
+                                {!editing && title}
+                                {editing && <InputText value={title} onChange={(e) => setTitle(e.target.value)} autoFocus className="w-full" />}
                             </h1>
                             <span className={classes.fileName}>
                                 📁 {filePath}
                                 <Badge value={project.language?.language} severity="info" />
                             </span>
+                            <Button icon={editing ? PrimeIcons.SAVE : PrimeIcons.PENCIL} onClick={handleEditing} className={"p-button-icon p-button-sm bg-transparent border-0 " + classes.editIconContainer} />
                         </div>
                     </div>
                 </div>

@@ -38,13 +38,13 @@ const ProjectProfileScreen: React.FC<ProjectProfileProps> = async ({params}) => 
             <Navigation searchEnabled={false} />
             <div className="block mx-0 xl:px-8 surface-50 overflow-hidden">
                 <div className="project-profile w-full">
-                    <ReviewHeader project={data.response} />
+                    <ReviewHeader project={data.response} review={reviewData} />
                 </div>
                 <div className="w-full p-4 xl:px-0 py-0">
                     <CodeReviewer reviewInfo={reviewData as IReview} project={data.response as IProject} mode="review" />
                 </div>
                 <div className="w-full p-4 xl:px-0">
-                    <ReviewAction project={data.response} />
+                    <ReviewAction project={data.response} review={reviewData} />
                 </div>
             </div>
         </React.Fragment>

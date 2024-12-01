@@ -18,7 +18,7 @@ export class UserTokenStore {
         UserTokenStore.userTokenInfo = tokenInfo;
     }
 
-    public static parseAndSetTokenInfo(session: Session): void {
+    public static parseAndSetTokenInfo(session: Session | null): void {
         if (session && session.user) {
             let user = session.user as IUserTokenInfo;
             UserTokenStore.setTokenInfo(user);

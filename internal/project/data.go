@@ -132,8 +132,14 @@ func GetProjects(opts ...func(*GetProjectsOptions)) ([]map[string]interface{}, i
 	}
 
 	// Execute the query
-	rows, err := database.Client.Query(query, "%"+options.Search+"%", options.UserID)
+	var rows *sql.Rows
+	if options.PopulateOwner && options.UserID != "" {
+		rows, err = database.Client.Query(query, "%"+options.Search+"%", options.UserID)
+	} else {
+		rows, err = database.Client.Query(query, "%"+options.Search+"%")
+	}
 	if err != nil {
+		fmt.Println(err)
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "42703" {
 			return nil, 0, fmt.Errorf("error occured while data retrival due to schema mismatch")
 		}

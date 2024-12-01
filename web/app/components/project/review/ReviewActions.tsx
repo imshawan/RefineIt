@@ -3,10 +3,16 @@
 import React from "react";
 import { Button } from "primereact/button";
 import { tss } from "tss-react";
-import { BadgeSeverityType } from "@refineit/types";
+import { BadgeSeverityType, IReview } from "@refineit/types";
+import { useEditor } from "@refineit/hooks/editor";
+import { endpoints } from "@refineit/common";
+import { http, parseParams } from "@refineit/utilities";
+import { useSession } from "next-auth/react";
+import { UserTokenStore } from "@refineit/lib";
 
 interface CodeReviewActionProps {
     project?: any;
+    review?: IReview;
 }
 
 const useStyles = tss.create(() => ({
@@ -18,8 +24,10 @@ const useStyles = tss.create(() => ({
     },
 }));
 
-export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {} }) => {
+export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {}, review }) => {
     const { classes } = useStyles();
+    const {data: session} = useSession();
+    const {code} = useEditor();
 
     const priorities: Record<string, BadgeSeverityType> = {
         "low": "info",
@@ -27,14 +35,22 @@ export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {} }) 
         "high": "danger",
     }
 
-    const handleSave = () => {}
+    const handleSave = () => {
+        if (!review || !review.id) return;
+
+        http.put(parseParams(endpoints.REVIEWS.UPDATE_CONTENT, {reviewId: review?.id}), {content: code, project_id: project.id})
+    }
 
     const handleSubmitReview = () => {}
+
+    React.useEffect(() => {
+        UserTokenStore.parseAndSetTokenInfo(session);
+    }, [session]);
 
     return (
         <div className={classes.reviewersSection}>
             <Button
-                label="Save Draft"
+                label="Save Changes"
                 icon="pi pi-save"
                 severity="success"
                 onClick={handleSave}
@@ -42,7 +58,7 @@ export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {} }) 
                 className="p-button-tertiary"
             />
             <Button
-                label="Submit Changes"
+                label="Submit Code"
                 icon="pi pi-check-circle"
                 onClick={handleSubmitReview}
                 size="small"

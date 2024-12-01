@@ -58,3 +58,42 @@ func GetReviewByProjectIdAndUser (ctx *gin.Context) {
 
 	helpers.FormatAPIResponse(ctx, http.StatusOK, review)
 }
+
+func UpdateReviewData(ctx *gin.Context) {
+	user, _ := ctx.Get("User")
+	reviewID := ctx.Param("review_id")
+
+	if reviewID == "" || len(reviewID) < 32 {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, errors.New("valid review id is required"))
+		return
+	}
+
+	userData, ok := user.(models.User)
+	if !ok {
+		helpers.FormatAPIResponse(ctx, http.StatusUnauthorized, errors.New("failed to assert user to models.User"))
+		return
+	}
+
+	var reviewRequest models.ReviewRequest
+	if err := ctx.ShouldBind(&reviewRequest); err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	reviewData := models.Review{}
+	if reviewRequest.Title != nil && *reviewRequest.Title != ""  {
+		reviewData.Title = *reviewRequest.Title
+	}
+
+	if reviewRequest.Content != nil && *reviewRequest.Content != "" {
+		reviewData.Content = *reviewRequest.Content
+	}
+
+	updatedReview, err := review.UpdateReviewContent(reviewID, reviewData, userData.ID)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusOK, updatedReview)
+}
