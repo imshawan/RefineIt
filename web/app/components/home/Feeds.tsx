@@ -49,12 +49,12 @@ export const Feeds: React.FC = () => {
     }
 
     React.useEffect(() => {
-        if (!user || !Object.keys(user).length) return;
+        // if (!user || !Object.keys(user).length) return;
 
-        UserTokenStore.setTokenInfo(session?.user as IUserTokenInfo);
+        UserTokenStore.parseAndSetTokenInfo(session)
         loadInitialProjects();
 
-    }, [user]);
+    }, []);
 
     React.useEffect(() => {
         if (!searchTerm) return;

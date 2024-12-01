@@ -36,6 +36,8 @@ const doRequest = async <T>(url: string, method: keyof AxiosInstance, config: Ax
             config.headers = {};
         }
         config.headers["Authorization"] = "Bearer " + UserTokenStore.getJwtToken();
+        config.headers["Accept"] = "application/json, text/plain, */*";
+        config.headers["Origin"] = process.env.HOST;
     }
 
     try {
