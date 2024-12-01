@@ -52,9 +52,10 @@ func GetReviewByCallerAndProjectId(projectId string, callerId string) (models.Re
 	var projectOwner json.RawMessage
 	var reviewer json.RawMessage
 	var projectData json.RawMessage
+	var diffsData json.RawMessage
 
 	err := database.Client.QueryRow(query, projectId, callerId).Scan(
-		&review.ID, &review.Title, &review.Content, &review.Rating, &review.ProjectID, &review.ProjectOwnerID, &review.ReviewerID,
+		&review.ID, &review.Title, &review.Content, &diffsData, &review.Rating, &review.ProjectID, &review.ProjectOwnerID, &review.ReviewerID,
 		&review.Status, pq.Array(&review.Tags), &review.UpvotesCount, &review.DownvotesCount,
 		&review.IsHighlighted, &review.CommentsCount, &review.LastCommentedAt, &review.CreatedAt, &review.UpdatedAt, &projectOwner,
 		&reviewer, &projectData,
@@ -73,6 +74,7 @@ func GetReviewByCallerAndProjectId(projectId string, callerId string) (models.Re
 	var ownerMap map[string]interface{}
 	var reviewerMap map[string]interface{}
 	var projectMap map[string]interface{}
+	var diffsMap map[string]interface{}
 	err = json.Unmarshal(projectOwner, &ownerMap)
 	if err != nil {
 		return review, err
@@ -85,10 +87,15 @@ func GetReviewByCallerAndProjectId(projectId string, callerId string) (models.Re
 	if err != nil {
 		return review, err
 	}
+	err = json.Unmarshal(diffsData, &diffsMap)
+	if err != nil {
+		return review, err
+	}
 
 	review.Project = projectMap
 	review.Reviewer = reviewerMap
 	review.ProjectOwner = ownerMap
+	review.Diffs = diffsMap
 
 	return review, nil
 }

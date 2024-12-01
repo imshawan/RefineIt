@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { tss } from "tss-react";
-import { http } from "@refineit/utilities";
+import { http, parseParams } from "@refineit/utilities";
 import AceEditor from "react-ace";
 import ace from "ace-builds/src-noconflict/ace";
 import { ContextMenu } from "primereact/contextmenu";
@@ -20,6 +20,9 @@ import { useEditor } from "@refineit/hooks/editor";
 import { debounce } from "lodash";
 import { IReview } from "@refineit/types";
 import { IAceEditor } from "react-ace/lib/types";
+import { endpoints } from "@refineit/common";
+import { useSession } from "next-auth/react";
+import { UserTokenStore } from "@refineit/lib";
 
 interface Annotation {
     row: number;
@@ -74,11 +77,8 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({
     height,
     reviewInfo,
 }) => {
-    const {
-        setAdditionsAndDeletions,
-        setCode: setEditorCode,
-        code: editorCode,
-    } = useEditor();
+    const { setAdditionsAndDeletions, setCode: setEditorCode, code: editorCode} = useEditor();
+    const {data: session} = useSession();
     const [loading, setLoading] = React.useState(true);
     const [code, setCode] = React.useState("");
     const [language, setLanguage] = React.useState("");
@@ -274,12 +274,15 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({
             }));
 
             const lcs: number = findLCS(oldHashes, newHashes);
+            const additions = (newLines.length - lcs);
+            const deletions = (oldLines.length - lcs);
 
             setAdditionsAndDeletions({
-                additions: newLines.length - lcs,
-                deletions: oldLines.length - lcs,
+                additions,
+                deletions,
             });
             setEditorCode(newLines.join("\n"));
+            handleDiffs(additions, deletions);
         },
         [code, setAdditionsAndDeletions, setEditorCode],
     );
@@ -290,6 +293,11 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({
 
     const onEditorLoaded = (editor: IAceEditor) => {
         editor.session.setMode(`ace/mode/${String(language).toLowerCase()}`);
+    }
+
+    const handleDiffs = (additions: number, deletions: number) => {
+        // if (!reviewInfo || !Object.keys(reviewInfo).length || !Object.keys(project).length) return;
+        // http.put(parseParams(endpoints.REVIEWS.UPDATE_CONTENT, {reviewId: reviewInfo.id}), {additions, deletions, project_id: project.id});
     }
 
     React.useEffect(() => {
@@ -326,18 +334,21 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({
 
     React.useEffect(() => {
         if (reviewInfo && reviewInfo.content && reviewInfo.content.length > 1) {
-            setCode(reviewInfo.content);
+            // setCode(reviewInfo.content);
             setEditorCode(reviewInfo.content);
-
-            setLoading(false);
-            return;
+            setAdditionsAndDeletions({
+                additions: reviewInfo.diffs.additions,
+                deletions: reviewInfo.diffs.deletions,
+            })
         }
 
         setLoading(true);
         http.get(project.file_url, {}, true)
             .then((res) => {
                 setCode(res as string);
-                setEditorCode(res as string);
+                if (!reviewInfo || !reviewInfo.content) {
+                    setEditorCode(res as string);
+                }
             })
             .catch((err) => {
                 console.log(err);
@@ -346,6 +357,14 @@ export const CodeReviewer: React.FC<CodeReviewerProps> = ({
                 setLoading(false);
             });
     }, [project.file_url, setEditorCode, reviewInfo]);
+
+    React.useEffect(() => {
+        if (!reviewInfo) return;
+        // We ony need the session tokens if there is review loaded
+
+        UserTokenStore.parseAndSetTokenInfo(session);
+
+    }, [reviewInfo])
 
     return (
         <div className="" ref={editorRef}>

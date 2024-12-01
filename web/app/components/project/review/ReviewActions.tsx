@@ -27,7 +27,7 @@ const useStyles = tss.create(() => ({
 export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {}, review }) => {
     const { classes } = useStyles();
     const {data: session} = useSession();
-    const {code} = useEditor();
+    const {code, additions, deletions} = useEditor();
 
     const priorities: Record<string, BadgeSeverityType> = {
         "low": "info",
@@ -38,7 +38,12 @@ export const ReviewAction: React.FC<CodeReviewActionProps> = ({ project = {}, re
     const handleSave = () => {
         if (!review || !review.id) return;
 
-        http.put(parseParams(endpoints.REVIEWS.UPDATE_CONTENT, {reviewId: review?.id}), {content: code, project_id: project.id})
+        http.put(
+            parseParams(endpoints.REVIEWS.UPDATE_CONTENT, {
+                reviewId: review?.id,
+            }),
+            { content: code, project_id: project.id, additions, deletions },
+        );
     }
 
     const handleSubmitReview = () => {}

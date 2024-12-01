@@ -38,10 +38,16 @@ interface User {
     username: string;
 }
 
+interface Diffs {
+    additions: number;
+    deletions: number;
+}
+
 export interface IReview {
     id: string;
     title: string;
     content: string;
+    diffs: Diffs;
     rating: number;
     project_id: string;
     project: Project;

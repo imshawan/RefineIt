@@ -7,6 +7,7 @@ CREATE TABLE
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
+    diffs JSONB,
     rating INT NOT NULL CHECK (rating >= 0 AND rating <= 5),
     project_id TEXT NOT NULL,
     project_owner_id TEXT NOT NULL,

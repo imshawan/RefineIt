@@ -2,6 +2,7 @@ package review
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -15,7 +16,7 @@ import (
 )
 
 var ReviewFields = []string{
-	"id", "title", "content", "rating", "project_id", "project_owner_id", "reviewer_id", "status", "tags", "upvotes_count", "downvotes_count",
+	"id", "title", "content", "diffs", "rating", "project_id", "project_owner_id", "reviewer_id", "status", "tags", "upvotes_count", "downvotes_count",
 	"is_highlighted", "comments_count", "last_commented_at", "created_at", "updated_at",
 }
 
@@ -60,16 +61,17 @@ func CreateReview(review models.Review) (models.Review, error) {
 	review.UpdatedAt = now
 
 	reviewFields := strings.Join(ReviewFields, ", ")
+	diffsJSON := json.RawMessage(`{"additions": 0, "deletions": 0}`)
 
 	// Construct the SQL query with the returning clause
 	count := len(ReviewFields)
 	query := fmt.Sprintf("INSERT INTO reviews (%s) VALUES (%s) RETURNING %s", reviewFields, database.GeneratePlaceholders(count, "$%d"), reviewFields)
 	// fmt.Println(query)
 
-	errs := database.Client.QueryRow(query, review.ID, review.Title, review.Content, review.Rating, review.ProjectID,
+	errs := database.Client.QueryRow(query, review.ID, review.Title, review.Content, diffsJSON, review.Rating, review.ProjectID,
 		review.ProjectOwnerID, review.ReviewerID, review.Status, pq.Array(review.Tags), review.UpvotesCount, review.DownvotesCount,
 		review.IsHighlighted, review.CommentsCount, review.LastCommentedAt, review.CreatedAt, review.UpdatedAt).Scan(
-		&review.ID, &review.Title, &review.Content, &review.Rating, &review.ProjectID, &review.ProjectOwnerID, &review.ReviewerID,
+		&review.ID, &review.Title, &review.Content, &diffsJSON, &review.Rating, &review.ProjectID, &review.ProjectOwnerID, &review.ReviewerID,
 		&review.Status, pq.Array(&review.Tags), &review.UpvotesCount, &review.DownvotesCount,
 		&review.IsHighlighted, &review.CommentsCount, &review.LastCommentedAt, &review.CreatedAt, &review.UpdatedAt)
 
@@ -81,15 +83,23 @@ func CreateReview(review models.Review) (models.Review, error) {
 		return review, fmt.Errorf("error inserting a review into the database")
 	}
 
+	var diffMap map[string]interface{}
+	err = json.Unmarshal(diffsJSON, &diffMap)
+	if err != nil {
+		return review, fmt.Errorf("error unmarshaling diffs")
+	}
+
+	review.Diffs = diffMap
+
 	return review, nil
 }
 
-func UpdateReviewContent(reviewID string, review models.Review, reviewerID string) (models.Review, error) {
+func UpdateReviewContent(reviewID string, review models.ReviewRequest, reviewerID string) error {
 	if reviewID == "" {
-		return review, errors.New("review id is required")
+		return errors.New("review id is required")
 	}
 	if reviewerID == "" {
-		return review, errors.New("reviewer ID is required")
+		return errors.New("reviewer ID is required")
 	}
 
 	// Lets check if the review exists of not, if exists, whether the person is allowed to edit
@@ -97,12 +107,12 @@ func UpdateReviewContent(reviewID string, review models.Review, reviewerID strin
 	err := database.Client.QueryRow("SELECT reviewer_id FROM reviews WHERE id = $1", reviewID).Scan(&authorID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return review, errors.New("review not found")
+			return errors.New("review not found")
 		}
-		return review, err
+		return err
 	}
 	if authorID != reviewerID {
-		return review, errors.New("unauthorized: you are not the author of this review")
+		return errors.New("unauthorized: you are not the author of this review")
 	}
 
 	// Check which fields to update
@@ -110,20 +120,27 @@ func UpdateReviewContent(reviewID string, review models.Review, reviewerID strin
 	args := []interface{}{}
 	argIndex := 1
 
-	if review.Content != "" {
+	if review.Content != nil && *review.Content != "" {
 		updateFields = append(updateFields, fmt.Sprintf("content = $%d", argIndex))
 		args = append(args, review.Content)
 		argIndex++
 	}
 
-	if review.Title != "" {
+	if review.Title != nil && *review.Title != "" {
 		updateFields = append(updateFields, fmt.Sprintf("title = $%d", argIndex))
 		args = append(args, review.Title)
 		argIndex++
 	}
 
+	if review.Additions != 0 && review.Deletions != 0 {
+		// Combine both additions and deletions in one jsonb_set call
+		updateFields = append(updateFields, fmt.Sprintf("diffs = jsonb_set(jsonb_set(diffs, '{additions}', $%d), '{deletions}', $%d)", argIndex, argIndex+1))
+		args = append(args, review.Additions, review.Deletions)
+		argIndex += 2
+	}
+
 	if len(updateFields) == 0 {
-		return review, nil
+		return nil
 	}
 
 	// Added the condition for the review ID
@@ -132,8 +149,8 @@ func UpdateReviewContent(reviewID string, review models.Review, reviewerID strin
 	query := fmt.Sprintf("UPDATE reviews SET %s WHERE id = $%d", strings.Join(updateFields, ", "), argIndex)
 	_, err = database.Client.Exec(query, args...)
 	if err != nil {
-		return review, err
+		return err
 	}
 
-	return review, nil
+	return nil
 }

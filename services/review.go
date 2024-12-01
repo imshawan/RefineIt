@@ -80,20 +80,23 @@ func UpdateReviewData(ctx *gin.Context) {
 		return
 	}
 
-	reviewData := models.Review{}
+	reviewData := models.ReviewRequest{}
 	if reviewRequest.Title != nil && *reviewRequest.Title != ""  {
-		reviewData.Title = *reviewRequest.Title
+		reviewData.Title = reviewRequest.Title
 	}
 
 	if reviewRequest.Content != nil && *reviewRequest.Content != "" {
-		reviewData.Content = *reviewRequest.Content
+		reviewData.Content = reviewRequest.Content
 	}
 
-	updatedReview, err := review.UpdateReviewContent(reviewID, reviewData, userData.ID)
+	reviewData.Additions = reviewRequest.Additions
+	reviewData.Deletions = reviewRequest.Deletions
+
+	err := review.UpdateReviewContent(reviewID, reviewData, userData.ID)
 	if err != nil {
 		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
-	helpers.FormatAPIResponse(ctx, http.StatusOK, updatedReview)
+	helpers.FormatAPIResponse(ctx, http.StatusOK, gin.H{"message": "Review updated successfully"})
 }
