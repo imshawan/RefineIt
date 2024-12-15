@@ -124,3 +124,13 @@ func GetISOTimestampUTC() string {
 func GetISOTimestampLocal() string {
 	return time.Now().Format(time.RFC3339)
 }
+
+// Includes checks if a string is present in an array
+func ArrayIncludes(arr []string, str string) bool {
+	for _, v := range arr {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}

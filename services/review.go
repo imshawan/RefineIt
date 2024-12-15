@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/imshawan/RefineIt/helpers"
@@ -99,4 +100,72 @@ func UpdateReviewData(ctx *gin.Context) {
 	}
 
 	helpers.FormatAPIResponse(ctx, http.StatusOK, gin.H{"message": "Review updated successfully"})
+}
+
+func GetAllReviews(ctx *gin.Context) {
+	// user, _ := ctx.Get("User")
+	projectID := ctx.Param("project_id")
+	page := ctx.DefaultQuery("page", "1")
+	limit := ctx.DefaultQuery("limit", "10")
+	userID := ctx.DefaultQuery("user_id", "")
+	searchQuery := ctx.DefaultQuery("search", "")
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+	}
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusBadRequest, err)
+	}
+
+	var options []func(*review.GetReviewsOptions)
+	projectOwnerFields := []string{"fullname", "username", "profile_picture"}
+	options = append(
+		options, 
+		review.WithProjectOwnerFields(projectOwnerFields), 
+		review.WithPageSize(limitInt),
+		review.WithPage(pageInt),
+		review.WithProjectID(projectID),
+	)
+
+	if userID != "" {
+		options = append(options, review.WithReviewerUserID(userID))
+	}
+	if searchQuery != "" {
+		options = append(options, review.WithSearch(searchQuery))
+	}
+	fields, ok := ctx.GetQueryArray("fields")
+	if ok {
+		var requiredFields []string
+		for _, item := range fields {
+			if helpers.ArrayIncludes(review.ReviewFields, item) {
+				requiredFields = append(requiredFields, item)
+			}
+		}
+
+		if helpers.ArrayIncludes(requiredFields, "project_owner") {
+			options = append(options, review.WithProjectOwner(true))
+		}
+
+		if len(requiredFields) > 0 {
+			options = append(options, review.WithFields(requiredFields))
+		}
+	} else {
+		options = append(options, review.WithProjectOwner(true))
+	}
+
+	reviews, total, err := review.GetReviewsByProject(options...)
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	paginated, err := helpers.PaginateApiResponse(reviews, total, limitInt, pageInt, ctx.FullPath())
+	if err != nil {
+		helpers.FormatAPIResponse(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	helpers.FormatAPIResponse(ctx, http.StatusOK, paginated)
 }
