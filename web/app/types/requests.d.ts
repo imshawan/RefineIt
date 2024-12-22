@@ -10,3 +10,10 @@ export namespace ApiRequests {
         failure: Function
     }
 }
+
+export interface IFetchQueryPayload {
+    page?: number
+    limit?: number
+    sortBy?: string
+    q?: string
+}

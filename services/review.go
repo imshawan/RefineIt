@@ -28,7 +28,7 @@ func CreateReview(ctx *gin.Context) {
 
 	newReview := models.Review{
 		ReviewerID: userData.ID,
-		ProjectID: reviewRequest.ProjectID,
+		ProjectID:  reviewRequest.ProjectID,
 	}
 
 	reviewData, err := review.CreateReview(newReview)
@@ -41,7 +41,7 @@ func CreateReview(ctx *gin.Context) {
 
 }
 
-func GetReviewByProjectIdAndUser (ctx *gin.Context) {
+func GetReviewByProjectIdAndUser(ctx *gin.Context) {
 	user, _ := ctx.Get("User")
 	projectID := ctx.Param("project_id")
 
@@ -82,7 +82,7 @@ func UpdateReviewData(ctx *gin.Context) {
 	}
 
 	reviewData := models.ReviewRequest{}
-	if reviewRequest.Title != nil && *reviewRequest.Title != ""  {
+	if reviewRequest.Title != nil && *reviewRequest.Title != "" {
 		reviewData.Title = reviewRequest.Title
 	}
 
@@ -122,8 +122,8 @@ func GetAllReviews(ctx *gin.Context) {
 	var options []func(*review.GetReviewsOptions)
 	projectOwnerFields := []string{"fullname", "username", "profile_picture"}
 	options = append(
-		options, 
-		review.WithProjectOwnerFields(projectOwnerFields), 
+		options,
+		review.WithProjectOwnerFields(projectOwnerFields),
 		review.WithPageSize(limitInt),
 		review.WithPage(pageInt),
 		review.WithProjectID(projectID),
@@ -146,6 +146,11 @@ func GetAllReviews(ctx *gin.Context) {
 
 		if helpers.ArrayIncludes(requiredFields, "project_owner") {
 			options = append(options, review.WithProjectOwner(true))
+		}
+		if helpers.ArrayIncludes(fields, "reviewer") {
+			options = append(options, review.WithReviewer(true), review.WithReviewerFields(projectOwnerFields))
+		} else {
+			options = append(options, review.WithReviewer(false))
 		}
 
 		if len(requiredFields) > 0 {

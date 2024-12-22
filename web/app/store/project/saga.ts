@@ -1,7 +1,7 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import { projectActions } from "./slice";
 import { getProjects } from "./api";
-import { IProjectFetchPayload } from "./api";
+import { IFetchQueryPayload } from "@refineit/types";
 import { ApiResponse } from "@refineit/types";
 
 function* onProjectsLoad(): Generator<any, void, string | ApiResponse.IBaseResponse> {
@@ -19,7 +19,7 @@ function* onProjectsLoad(): Generator<any, void, string | ApiResponse.IBaseRespo
     }
 }
 
-function* onProjectsLoadPaginated({ payload }: { payload: IProjectFetchPayload }): Generator<any, void, string | ApiResponse.IBaseResponse> {
+function* onProjectsLoadPaginated({ payload }: { payload: IFetchQueryPayload }): Generator<any, void, string | ApiResponse.IBaseResponse> {
     try {
         const data: string | ApiResponse.IBaseResponse = yield call(getProjects, payload);
         if (typeof data === "object") {

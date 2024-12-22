@@ -24,6 +24,7 @@ export const endpoints = {
     REVIEWS: {
         NEW: API_SERVER_HOST + "/api/reviews/new",
         GET_BY_PROJECT_USER: API_SERVER_HOST + "/api/reviews/project/{{projectId}}",
+        GET_BY_PROJECT: API_SERVER_HOST + "/api/reviews/project/{{projectId}}/all?{{query}}",
         UPDATE_CONTENT: API_SERVER_HOST + "/api/reviews/update/{{reviewId}}"
     }
 }

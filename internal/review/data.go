@@ -22,8 +22,10 @@ type GetReviewsOptions struct {
 	Fields               []string
 	PopulateProjectOwner bool
 	ProjectOwnerFields   []string
+	ReviewerFields       []string
 	UserID               string
 	ProjectID            string
+	PopulateReviewer     bool
 }
 
 // Default values for parameters
@@ -34,6 +36,7 @@ const (
 	DefaultSearch               = ""
 	DefaultFieldCount           = 0
 	DefaultPopulateProjectOwner = false
+	PopulateReviewer            = false
 )
 
 func GetReviewByCallerAndProjectId(projectId string, callerId string) (models.Review, error) {
@@ -132,7 +135,9 @@ func GetReviewsByProject(opts ...func(*GetReviewsOptions)) ([]map[string]interfa
 		Fields:               ReviewFields,
 		PopulateProjectOwner: DefaultPopulateProjectOwner,
 		ProjectOwnerFields:   user.PublicFields,
+		ReviewerFields:       user.PublicFields,
 		UserID:               "",
+		PopulateReviewer:     PopulateReviewer,
 	}
 
 	for _, opt := range opts {
@@ -150,21 +155,36 @@ func GetReviewsByProject(opts ...func(*GetReviewsOptions)) ([]map[string]interfa
 
 	fieldList := strings.Join(fields, ", ")
 
-	query := fmt.Sprintf(`SELECT %s, jsonb_build_object() AS project_owner FROM reviews as review `, fieldList)
-
-	if options.UserID != "" {
-		query = fmt.Sprintf(`SELECT %s, jsonb_build_object() AS project_owner
-		 FROM reviews as review `, fieldList)
+	var projectOwnerFields []string
+	for _, field := range options.ProjectOwnerFields {
+		projectOwnerFields = append(projectOwnerFields, fmt.Sprintf("'%s', project_owner.%s", field, field))
 	}
+	projectOwnerFieldList := strings.Join(projectOwnerFields, ", ")
+
+	var reviewerFields []string
+	for _, field := range options.ReviewerFields {
+		reviewerFields = append(reviewerFields, fmt.Sprintf("'%s', reviewer.%s", field, field))
+	}
+	reviewerFieldList := strings.Join(reviewerFields, ", ")
+
+	query := fmt.Sprintf(`SELECT %s`, fieldList)
 
 	if options.PopulateProjectOwner {
-		var projectAuthorFields []string
-		for _, field := range options.ProjectOwnerFields {
-			projectAuthorFields = append(projectAuthorFields, fmt.Sprintf("'%s', users.%s", field, field))
-		}
+		query += fmt.Sprintf(", jsonb_build_object(%s) AS project_owner", projectOwnerFieldList)
+	}
 
-		ownerFieldList := strings.Join(projectAuthorFields, ", ")
-		query = fmt.Sprintf(`SELECT %s, jsonb_build_object(%s) AS project_owner FROM reviews as review LEFT JOIN users ON review.project_owner_id = users.id `, fieldList, ownerFieldList)
+	if options.PopulateReviewer {
+		query += fmt.Sprintf(", jsonb_build_object(%s) AS reviewer", reviewerFieldList)
+	}
+
+	query += " FROM reviews AS review"
+
+	if options.PopulateProjectOwner {
+		query += " LEFT JOIN users AS project_owner ON review.project_owner_id = project_owner.id"
+	}
+
+	if options.PopulateReviewer {
+		query += " LEFT JOIN users AS reviewer ON review.reviewer_id = reviewer.id"
 	}
 
 	query += " WHERE (review.title ILIKE $1) "
@@ -352,5 +372,19 @@ func WithReviewerUserID(userID string) func(*GetReviewsOptions) {
 func WithProjectID(projectID string) func(*GetReviewsOptions) {
 	return func(opts *GetReviewsOptions) {
 		opts.ProjectID = projectID
+	}
+}
+
+// WithReviewer sets if reviewer info has to be populated
+func WithReviewer(value bool) func(*GetReviewsOptions) {
+	return func(opts *GetReviewsOptions) {
+		opts.PopulateReviewer = value
+	}
+}
+
+// WithReviewerFields defines the reviewer schema fields to retrieve for a review
+func WithReviewerFields(fields []string) func(*GetReviewsOptions) {
+	return func(opts *GetReviewsOptions) {
+		opts.ReviewerFields = fields
 	}
 }
